@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 96178ab65558c56418b9b93321f2bea9, type: 3}
+  m_Name: DefaultHealthData
+  m_EditorClassIdentifier: Assembly-CSharp::HealthData
+  maximumHealth: 100
+  healthRegenAmount: 10
+  healthRegenCooldown: 30
+  healthBarPrefab: {fileID: 7734199308836434670, guid: 0e53c418b0fd86349a598d7660194800, type: 3}
+  maximumEnergyShields: 0
+  energyShieldRegenAmount: 0
+  energyShieldRegenCooldown: 0

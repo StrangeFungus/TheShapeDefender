@@ -12,10 +12,10 @@ GameObject:
   - component: {fileID: 5268915118984336730}
   - component: {fileID: 6264945028471811266}
   - component: {fileID: 6607967899882340834}
-  - component: {fileID: 3904361305753141957}
-  - component: {fileID: 6829441039388658492}
+  - component: {fileID: 677781716565628792}
+  - component: {fileID: 4255497190273562971}
   m_Layer: 0
-  m_Name: EntityOutline
+  m_Name: BaseEntity
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -83,7 +83,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 1568745355
-  m_SortingLayer: 3
+  m_SortingLayer: 4
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_Sprite: {fileID: -7864966505307629240, guid: 945c5f631a70bb24482dcbb320df8a39, type: 3}
@@ -158,9 +158,9 @@ Rigidbody2D:
   m_Simulated: 1
   m_UseFullKinematicContacts: 0
   m_UseAutoMass: 0
-  m_Mass: 1
-  m_LinearDamping: 0
-  m_AngularDamping: 0.05
+  m_Mass: 10
+  m_LinearDamping: 10
+  m_AngularDamping: 0
   m_GravityScale: 0
   m_Material: {fileID: 0}
   m_IncludeLayers:
@@ -169,11 +169,11 @@ Rigidbody2D:
   m_ExcludeLayers:
     serializedVersion: 2
     m_Bits: 0
-  m_Interpolate: 0
+  m_Interpolate: 1
   m_SleepingMode: 1
-  m_CollisionDetection: 0
-  m_Constraints: 0
---- !u!114 &3904361305753141957
+  m_CollisionDetection: 1
+  m_Constraints: 4
+--- !u!114 &677781716565628792
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -182,18 +182,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 2063204205241986063}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 77cc893568cec354cab7f7173133146b, type: 3}
+  m_Script: {fileID: 11500000, guid: cd3bd53904f2e184383ac6cb7c1b527b, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::HealthController
-  currentHealth: 0
-  maximumHealth: 0
-  healthRegenAmount: 0
-  healthRegenCooldown: 0
-  currentEnergyShields: 0
-  maximumEnergyShields: 0
-  energyShieldRegenAmount: 0
-  energyShieldRegenCooldown: 0
---- !u!114 &6829441039388658492
+  m_EditorClassIdentifier: Assembly-CSharp::MovementController
+  movementSpeed: 0
+--- !u!114 &4255497190273562971
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -202,10 +195,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 2063204205241986063}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c0b2a31e5e44f4843a2148641ef48acd, type: 3}
+  m_Script: {fileID: 11500000, guid: 06fd7ae0832e77a4ab21f84a3670762e, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::BaseEntityController
-  healthController: {fileID: 3904361305753141957}
+  m_EditorClassIdentifier: Assembly-CSharp::AttackContainer
+  attackDataTemplates: []
 --- !u!1 &2343273680522941736
 GameObject:
   m_ObjectHideFlags: 0
@@ -284,7 +277,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 1568745355
-  m_SortingLayer: 3
+  m_SortingLayer: 4
   m_SortingOrder: 1
   m_MaskInteraction: 0
   m_Sprite: {fileID: -4119697629223375408, guid: 6d5ffd77af1b8e742affa8b7eb3fc32d, type: 3}

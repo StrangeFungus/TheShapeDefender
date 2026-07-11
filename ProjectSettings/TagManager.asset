@@ -16,8 +16,8 @@ TagManager:
   - 
   - 
   - 
-  - 
-  - 
+  - Player
+  - Enemy
   - 
   - 
   - 
@@ -45,11 +45,17 @@ TagManager:
   - name: Enviroment
     uniqueID: 1026481089
     locked: 0
+  - name: Projectile/Attacks
+    uniqueID: 3099522415
+    locked: 0
   - name: Effects
     uniqueID: 3880067291
     locked: 0
   - name: Entities
     uniqueID: 1568745355
+    locked: 0
+  - name: Text/UI
+    uniqueID: 3505602249
     locked: 0
   m_RenderingLayers:
   - Default
