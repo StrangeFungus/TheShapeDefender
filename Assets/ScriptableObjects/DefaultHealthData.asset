@@ -12,10 +12,35 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 96178ab65558c56418b9b93321f2bea9, type: 3}
   m_Name: DefaultHealthData
   m_EditorClassIdentifier: Assembly-CSharp::HealthData
-  maximumHealth: 100
-  healthRegenAmount: 10
-  healthRegenCooldown: 30
-  healthBarPrefab: {fileID: 7734199308836434670, guid: 0e53c418b0fd86349a598d7660194800, type: 3}
-  maximumEnergyShields: 0
-  energyShieldRegenAmount: 0
-  energyShieldRegenCooldown: 0
+  defaultMaximumHealth: 100
+  defaultHealthRegenAmount: 10
+  defaultHealthRegenCooldown: 30
+  maximumHealthPerLevelUp: 10
+  healthRegenAmountPerLevelUp: 5
+  healthRegenCooldownPerLevelUp: -0.05
+  maximumHealthLevel: 1
+  healthRegenAmountLevel: 0
+  healthRegenCooldownLevel: 0
+  healthRegenAmountUnlockCost: 10
+  maximumHealthExpCost: 2
+  healthRegenAmountExpCost: 2
+  healthRegenCooldownExpCost: 2
+  canLevelUpHealthRegen: 0
+  currentHealth: 0
+  defaultMaximumEnergyShield: 15
+  defaultEnergyShieldRegenAmount: 3
+  defaultEnergyShieldRegenCooldown: 30
+  maximumEnergyShieldPerLevelUp: 10
+  energyShieldsRegenAmountPerLevelUp: 2
+  energyShieldsRegenCooldownPerLevelUp: -0.05
+  maximumEnergyShieldsLevel: 0
+  energyShieldRegenAmountLevel: 0
+  energyShieldRegenCooldownLevel: 0
+  maximumEnergyShieldUnlockCost: 20
+  energyShieldsRegenAmountUnlockCost: 10
+  maximumEnergyShieldExpCost: 5
+  energyShieldsRegenAmountExpCost: 5
+  energyShieldsRegenCooldownExpCost: 5
+  canLevelUpMaximumEnergyShield: 0
+  canLevelUpEnergyShieldRegen: 0
+  currentEnergyShields: 0

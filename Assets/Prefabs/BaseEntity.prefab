@@ -12,8 +12,6 @@ GameObject:
   - component: {fileID: 5268915118984336730}
   - component: {fileID: 6264945028471811266}
   - component: {fileID: 6607967899882340834}
-  - component: {fileID: 677781716565628792}
-  - component: {fileID: 4255497190273562971}
   m_Layer: 0
   m_Name: BaseEntity
   m_TagString: Untagged
@@ -173,32 +171,6 @@ Rigidbody2D:
   m_SleepingMode: 1
   m_CollisionDetection: 1
   m_Constraints: 4
---- !u!114 &677781716565628792
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2063204205241986063}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: cd3bd53904f2e184383ac6cb7c1b527b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::MovementController
-  movementSpeed: 0
---- !u!114 &4255497190273562971
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2063204205241986063}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 06fd7ae0832e77a4ab21f84a3670762e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::AttackContainer
-  attackDataTemplates: []
 --- !u!1 &2343273680522941736
 GameObject:
   m_ObjectHideFlags: 0
