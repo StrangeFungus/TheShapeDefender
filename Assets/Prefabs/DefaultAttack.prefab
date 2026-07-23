@@ -13,7 +13,6 @@ GameObject:
   - component: {fileID: 1426413858405436968}
   - component: {fileID: 4767265376233252463}
   - component: {fileID: 5403563467139568929}
-  - component: {fileID: 4363715193800131599}
   m_Layer: 0
   m_Name: DefaultAttack
   m_TagString: Untagged
@@ -184,18 +183,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4f20018709035774590310881f7c1d24, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AttackController
-  damageDataTemplate: {fileID: 11400000, guid: 9ed6ae8920adb6c45aed9bd64d5ca1d9, type: 2}
-  tempDisplayTextPrefab: {fileID: 305829541919319688, guid: c1f5cd83c963a714ca4a2314f1fecbd1, type: 3}
---- !u!114 &4363715193800131599
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1937510024792472010}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3f11359926823a3468039dbc9ae8e9ff, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::MovementDataController
-  movementDataTemplate: {fileID: 11400000, guid: 7ec33079cad68524f841c8c3adf1c9e9, type: 2}
+  runtimeAttackStatSO: {fileID: 0}
+  runtimeDamageStatSO: {fileID: 0}

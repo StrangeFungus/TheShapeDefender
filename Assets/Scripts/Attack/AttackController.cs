@@ -3,96 +3,87 @@ namespace ShapeDefender
     namespace AttackSystem
     {
         using ShapeDefender.DamageSystem;
-        using ShapeDefender.MovementSystem;
-        using TMPro;
+        using ShapeDefender.Tools;
         using UnityEngine;
 
         [System.Serializable]
         public class AttackController : MonoBehaviour
         {
-            private AttackData runtimeAttackData;
-            public AttackData RuntimeAttackData { get { return runtimeAttackData; } set { if (value != null) { runtimeAttackData = value; } } }
-
-            private MovementDataController attacksMovementController;
+            [HideInInspector] public AttackStatSO runtimeAttackStatSO;
 
             private GameObject targetObject;
             private Vector3 targetLocation;
             private string targetTag;
             private Vector2 targetDirection;
 
-            [SerializeField] private DamageData damageDataTemplate;
-            private DamageData runtimeDamageData;
+            [HideInInspector] public DamageStatSO runtimeDamageStatSO;
 
             private Vector3 spawnPosition;
             private float distanceTraveled = 0f;
 
-            [SerializeField] protected GameObject tempDisplayTextPrefab;
-            protected TextMeshPro tempDisplayText;
+            private Rigidbody2D hostsRigidbody2D;
 
             private void Awake()
             {
-                if (damageDataTemplate != null)
-                {
-                    runtimeDamageData = Instantiate(damageDataTemplate);
-                }
-
-                attacksMovementController = GetComponent<MovementDataController>();
-
-                tempDisplayText = Instantiate(tempDisplayTextPrefab).GetComponent<TextMeshPro>();
-
-                spawnPosition = transform.position;
+                hostsRigidbody2D = GetComponent<Rigidbody2D>();
+                SetSpawnPosition();
             }
 
             private void Update()
             {
-                tempDisplayText.gameObject.transform.position = transform.position;
-                string textToDisplay = runtimeAttackData.GetAttackValuesString();
-                textToDisplay += $"Target Object: {targetObject}\n";
-                textToDisplay += $"Target Location: {targetLocation}\n";
-                textToDisplay += $"Target Tag: {targetTag}\n";
-                textToDisplay += $"Target Direction: {targetDirection}\n";
-                tempDisplayText.SetText(textToDisplay);
-
                 distanceTraveled = (spawnPosition - transform.position).sqrMagnitude;
-                if (distanceTraveled >= runtimeAttackData.AttackRangeMaximum)
+                if (distanceTraveled >= runtimeAttackStatSO.attackRangeMaximum.StatValue)
                 {
-                    Destroy(tempDisplayText.gameObject);
                     Destroy(gameObject);
                 }
             }
 
             private void FixedUpdate()
             {
-                if (runtimeAttackData.HomesOntoTarget && targetObject != null)
-                {
-                    targetDirection = (targetObject.transform.position - transform.position).normalized;
-                }
-
-                attacksMovementController.Move(targetDirection);
+                // Move forward
+                Vector2 forward = transform.up;
+                hostsRigidbody2D.linearVelocity = forward * 20f;
             }
 
             private void OnTriggerEnter2D(Collider2D collision)
             {
                 if (collision.CompareTag(targetTag))
                 {
-                    DamageProcessor.ProcessDamageToTarget(collision.gameObject, runtimeDamageData);
-                    Destroy(tempDisplayText.gameObject);
-                    Destroy(gameObject);
+                    bool wasAttackReflected = DamageProcessor.ProcessDamageToTarget(collision.gameObject, gameObject, runtimeDamageStatSO);
+                    if (!wasAttackReflected)
+                    {
+                        Destroy(gameObject);
+                    }
                 }
+            }
+
+            public void SetSpawnPosition()
+            {
+                spawnPosition = transform.position;
             }
 
             public void SetTarget(GameObject targetsObject)
             {
-                if (targetsObject == null)
-                {
-                    return;
-                }
+                if (targetsObject == null) { return; }
 
                 targetObject = targetsObject;
                 targetLocation = targetsObject.transform.position;
                 targetTag = targetsObject.tag;
                 targetDirection = (targetLocation - transform.position).normalized;
+                Vector2 directionToTarget = (targetObject.transform.position - transform.position).normalized;
+                float targetAngle = Mathf.Atan2(directionToTarget.y, directionToTarget.x) * Mathf.Rad2Deg - 90f;
+                hostsRigidbody2D.SetRotation(targetAngle);
             }
+            /*
+            private void OnDrawGizmos()
+            {
+                if (targetLocation != null)
+                {
+                    Gizmos.color = Color.yellow;
+                    Gizmos.DrawLine(transform.position, targetLocation);
+                }
+            }
+            */
         }
     }
 }

@@ -14,8 +14,6 @@ namespace ShapeDefender
                     if (playerTarget != null)
                     {
                         float distSquared = (playerTarget.transform.position - callingObject.transform.position).sqrMagnitude;
-
-                        // Check min range + max range
                         if (distSquared >= minRange && distSquared <= maxRange)
                         {
                             return playerTarget;
@@ -40,8 +38,6 @@ namespace ShapeDefender
                     foreach (var target in allTargets)
                     {
                         float distSquared = (target.transform.position - callingObject.transform.position).sqrMagnitude;
-
-                        // Check min range + max range
                         if (distSquared >= minRange && distSquared <= maxRange)
                         {
                             if (distSquared < closestDistance)

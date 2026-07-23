@@ -1,0 +1,77 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 05deee1a779184f49bceaa9947545f83, type: 3}
+  m_Name: DefaultDamageStats
+  m_EditorClassIdentifier: Assembly-CSharp::ShapeDefender.DamageSystem.DamageStatSO
+  minimumDamage:
+    defaultStatValue: 1
+    additiveStatValuePerLevel: 0.5
+    canLevelUp: 1
+    expCostToUnlock: 0
+    expCostToLevel: 10
+    displaySuffix: 
+  maximumDamage:
+    defaultStatValue: 3
+    additiveStatValuePerLevel: 0.5
+    canLevelUp: 1
+    expCostToUnlock: 0
+    expCostToLevel: 10
+    displaySuffix: 
+  criticalHitChance:
+    defaultStatValue: 0
+    additiveStatValuePerLevel: 0.2
+    canLevelUp: 1
+    expCostToUnlock: 0
+    expCostToLevel: 10
+    displaySuffix: '%'
+  criticalHitDamage:
+    defaultStatValue: 150
+    additiveStatValuePerLevel: 10
+    canLevelUp: 1
+    expCostToUnlock: 0
+    expCostToLevel: 10
+    displaySuffix: '%'
+  splashDamageRadius:
+    defaultStatValue: 0
+    additiveStatValuePerLevel: 0
+    canLevelUp: 0
+    expCostToUnlock: 0
+    expCostToLevel: 0
+    displaySuffix: 
+  splashDamageFalloffRate:
+    defaultStatValue: 0
+    additiveStatValuePerLevel: 0
+    canLevelUp: 0
+    expCostToUnlock: 0
+    expCostToLevel: 0
+    displaySuffix: 
+  knockbackDistance:
+    defaultStatValue: 0
+    additiveStatValuePerLevel: 0
+    canLevelUp: 0
+    expCostToUnlock: 0
+    expCostToLevel: 0
+    displaySuffix: 
+  knockbackDamage:
+    defaultStatValue: 0
+    additiveStatValuePerLevel: 0
+    canLevelUp: 0
+    expCostToUnlock: 0
+    expCostToLevel: 0
+    displaySuffix: 
+  ignoreArmorAmount:
+    defaultStatValue: 0
+    additiveStatValuePerLevel: 0
+    canLevelUp: 0
+    expCostToUnlock: 0
+    expCostToLevel: 0
+    displaySuffix: 

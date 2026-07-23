@@ -15,25 +15,32 @@ namespace ShapeDefender
 
             [SerializeField] private TextMeshProUGUI statsLevelValueText;
 
-            public void UpdateUnlockButtonText(float valueToUnlock)
+            public void UpdateUnlockButtonText(StatEntry statsEntry)
             {
+                float valueToUnlock = statsEntry.expCostToUnlock;
                 unlockButtonText.SetText($"Experience To Unlock:\n{valueToUnlock:F2}");
             }
 
-            public void UpdatePurchaseButtonText(float valueToLevelUp)
+            public void UnlockPurchaseButton(StatEntry statsEntry)
             {
-                purchaseButtonText.SetText($"Experience To Level Up:\n{valueToLevelUp:F2}");
-            }
-
-            public void UpdateStatsLevelValueText(float valueToDisplay, string endingStringExtension = "")
-            {
-                statsLevelValueText.SetText($"{valueToDisplay:F2} {endingStringExtension}");
-            }
-
-            public void UnlockPurchaseButton()
-            {
+                statsEntry.canLevelUp = true;
                 unlockButton.SetActive(false);
                 purchaseButton.SetActive(true);
+                UpdateMenuEntry(statsEntry);
+            }
+
+            public void DisablePurchaseButton()
+            {
+                purchaseButton.SetActive(false);
+            }
+
+            public void UpdateMenuEntry(StatEntry statsEntry)
+            {
+                float valueToLevelUp = statsEntry.expCostToLevel;
+                purchaseButtonText.SetText($"Experience To Level Up:\n{valueToLevelUp:F2}");
+
+                float valueToDisplay = statsEntry.StatValue;
+                statsLevelValueText.SetText($"{valueToDisplay:F2} {statsEntry.displaySuffix}");
             }
         }
     }

@@ -9,12 +9,12 @@ namespace ShapeDefender
         [System.Serializable]
         public class BaseEntity : MonoBehaviour
         {
-            protected MovementDataController entitiesMovementController;
+            protected MovementStatContainer entitiesMovementStatContainer;
             protected AttackContainer attackContainer;
 
             protected void Awake()
             {
-                entitiesMovementController = GetComponent<MovementDataController>();
+                entitiesMovementStatContainer = GetComponent<MovementStatContainer>();
                 attackContainer = GetComponent<AttackContainer>();
             }
 
@@ -22,8 +22,6 @@ namespace ShapeDefender
             {
                 attackContainer.AttemptToUseAttacks();
             }
-
-            // on disable we can eventually return the entity back to the object pool
         }
     }
 }

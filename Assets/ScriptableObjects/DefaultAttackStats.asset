@@ -1,0 +1,96 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 39ca8c34b902aaa419dfa5660cef5674, type: 3}
+  m_Name: DefaultAttackStats
+  m_EditorClassIdentifier: Assembly-CSharp::ShapeDefender.AttackSystem.AttackStatSO
+  projectilePrefab: {fileID: 1937510024792472010, guid: 225510910222efc4983e9b0ecc9e8527, type: 3}
+  homesOntoTarget: 0
+  attackRangeMinimum:
+    defaultStatValue: 0
+    additiveStatValuePerLevel: 0
+    canLevelUp: 1
+    expCostToUnlock: 0
+    expCostToLevel: 0
+    displaySuffix: m
+  attackRangeMaximum:
+    defaultStatValue: 2500
+    additiveStatValuePerLevel: 20
+    canLevelUp: 1
+    expCostToUnlock: 0
+    expCostToLevel: 10
+    displaySuffix: m
+  attackCooldown:
+    defaultStatValue: 5
+    additiveStatValuePerLevel: -0.01
+    canLevelUp: 1
+    expCostToUnlock: 0
+    expCostToLevel: 10
+    displaySuffix: 
+  currentAttacksCooldown: 0
+  attackAccuracyAngle:
+    defaultStatValue: 45
+    additiveStatValuePerLevel: -0.05
+    canLevelUp: 1
+    expCostToUnlock: 0
+    expCostToLevel: 10
+    displaySuffix: "\xB0"
+  projectileCount:
+    defaultStatValue: 1
+    additiveStatValuePerLevel: 0.1
+    canLevelUp: 1
+    expCostToUnlock: 0
+    expCostToLevel: 10
+    displaySuffix: 
+  multistrikeChance:
+    defaultStatValue: 0
+    additiveStatValuePerLevel: 0.5
+    canLevelUp: 1
+    expCostToUnlock: 0
+    expCostToLevel: 10
+    displaySuffix: '%'
+  multistrikeMaxHitsCombo:
+    defaultStatValue: 1
+    additiveStatValuePerLevel: 0.2
+    canLevelUp: 1
+    expCostToUnlock: 0
+    expCostToLevel: 10
+    displaySuffix: 
+  targetPiercingQuantity:
+    defaultStatValue: 0
+    additiveStatValuePerLevel: 0.25
+    canLevelUp: 1
+    expCostToUnlock: 0
+    expCostToLevel: 10
+    displaySuffix: 
+  areaOfEffectRadius:
+    defaultStatValue: 0
+    additiveStatValuePerLevel: 0
+    canLevelUp: 0
+    expCostToUnlock: 0
+    expCostToLevel: 0
+    displaySuffix: 
+  currentSummonsAmount: 0
+  maximumSummonsLimit:
+    defaultStatValue: 0
+    additiveStatValuePerLevel: 0
+    canLevelUp: 0
+    expCostToUnlock: 0
+    expCostToLevel: 0
+    displaySuffix: 
+  summonSpawnCooldown:
+    defaultStatValue: 0
+    additiveStatValuePerLevel: 0
+    canLevelUp: 0
+    expCostToUnlock: 0
+    expCostToLevel: 0
+    displaySuffix: 
+  projectilesDamageStatSOTemplate: {fileID: 11400000, guid: 5787cd9e648d8bc4aa9cc95024e7f93b, type: 2}

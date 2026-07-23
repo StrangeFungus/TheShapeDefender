@@ -2,6 +2,7 @@ namespace ShapeDefender
 {
     namespace EntitySystem
     {
+        using ShapeDefender.UI;
         using UnityEngine;
         using UnityEngine.InputSystem;
 
@@ -24,11 +25,21 @@ namespace ShapeDefender
             {
                 movementInput = movementAction.ReadValue<Vector2>();
                 base.Update();
+
+                if (Keyboard.current.oKey.wasPressedThisFrame)
+                {
+                    RespawnScreenManager.Instance.ToggleRespawnScreen();
+                }
+            }
+
+            private void OnDisable()
+            {
+                RespawnScreenManager.Instance.ToggleRespawnScreen();
             }
 
             private void FixedUpdate()
             {
-                entitiesMovementController.Move(movementInput);
+                entitiesMovementStatContainer.Move(movementInput);
             }
         }
     }

@@ -15,16 +15,19 @@ namespace ShapeDefender
         {
             public static LevelUpMenuManager Instance;
 
-            private float playersExperiencePoints = 10000;
+            public float playersExperiencePoints = 10000;
             [SerializeField] private TextMeshProUGUI experienceText;
-            [SerializeField] private HealthDataController playersHealthDataController;
-            [SerializeField] private DefenseDataController playersDefenseDataController;
-            [SerializeField] private MovementDataController playersMovementDataController;
+            [SerializeField] private HealthStatContainer playersHealthStatContainer;
+            [SerializeField] private DefenseStatContainer playersDefenseStatContainer;
+            [SerializeField] private MovementStatContainer playersMovementStatContainer;
 
             [SerializeField] private List<LevelUpMenuEntryController> levelUpMenuEntryControllers;
 
             [SerializeField] private Button openCloseButton;
             [SerializeField] private TextMeshProUGUI openCloseButtonsText;
+            private readonly float menuDefaultDuration = 2f;
+            private float currentMenuDuration = 0f;
+            private float targetMenuDuration = 0f;
             private bool isMenuOpen = true;
             private Coroutine menuSlidingCoroutine;
             private RectTransform menusRectTransform;
@@ -39,6 +42,8 @@ namespace ShapeDefender
                 {
                     Destroy(gameObject);
                 }
+
+                targetMenuDuration = menuDefaultDuration;
             }
 
             private void Start()
@@ -47,131 +52,86 @@ namespace ShapeDefender
                 SetDefaultMenuState();
                 menusRectTransform = (RectTransform)transform;
                 UpdateExperiencePointTrackerText();
+                ToggleOpenCloseMenu();
             }
 
             private void SetDefaultMenuValues()
             {
                 // UNLOCK COSTS
-                levelUpMenuEntryControllers[1].UpdateUnlockButtonText(playersHealthDataController.RuntimeHealthData.healthRegenAmountUnlockCost); // Health Regen Amount
-                levelUpMenuEntryControllers[3].UpdateUnlockButtonText(playersHealthDataController.RuntimeHealthData.maximumEnergyShieldUnlockCost); // Max Energy Shields
-                levelUpMenuEntryControllers[4].UpdateUnlockButtonText(playersHealthDataController.RuntimeHealthData.energyShieldsRegenAmountUnlockCost); // Energy Shield Regen Amount
-                levelUpMenuEntryControllers[6].UpdateUnlockButtonText(playersDefenseDataController.RuntimeDefenseData.parryChanceUnlockCost); // Parry Chance
-                levelUpMenuEntryControllers[8].UpdateUnlockButtonText(playersDefenseDataController.RuntimeDefenseData.counterAttackChanceUnlockCost); // Counter Attack Chance
-                levelUpMenuEntryControllers[9].UpdateUnlockButtonText(playersDefenseDataController.RuntimeDefenseData.blockChanceUnlockCost); // Block Chance
-                levelUpMenuEntryControllers[11].UpdateUnlockButtonText(playersDefenseDataController.RuntimeDefenseData.blockAmountUnlockCost); // Block Amount
-                levelUpMenuEntryControllers[12].UpdateUnlockButtonText(playersDefenseDataController.RuntimeDefenseData.reflectAttackChanceUnlockCost); // Reflect Attack Chance
-                levelUpMenuEntryControllers[13].UpdateUnlockButtonText(playersDefenseDataController.RuntimeDefenseData.reflectAttackAngleUnlockCost); // Reflect Attack Angle
-                levelUpMenuEntryControllers[14].UpdateUnlockButtonText(playersDefenseDataController.RuntimeDefenseData.dodgeChanceUnlockCost); // Dodge Chance
-                levelUpMenuEntryControllers[16].UpdateUnlockButtonText(playersDefenseDataController.RuntimeDefenseData.armorValueUnlockCost); // Armor Value
-                levelUpMenuEntryControllers[17].UpdateUnlockButtonText(playersDefenseDataController.RuntimeDefenseData.thornsAmountUnlockCost); // Thorns Amount
-                levelUpMenuEntryControllers[18].UpdateUnlockButtonText(playersDefenseDataController.RuntimeDefenseData.criticalHitChanceResistUnlockCost); // Critical Hit Chance Resist
-                levelUpMenuEntryControllers[19].UpdateUnlockButtonText(playersDefenseDataController.RuntimeDefenseData.criticalHitDamageResistUnlockCost); // Critical Hit Damage Resist
-                levelUpMenuEntryControllers[20].UpdateUnlockButtonText(playersDefenseDataController.RuntimeDefenseData.statusEffectResistUnlockCost); // Status Effect Resist
-                levelUpMenuEntryControllers[21].UpdateUnlockButtonText(playersDefenseDataController.RuntimeDefenseData.physicalDamageResistUnlockCost); // Physical Damage Resist
-                levelUpMenuEntryControllers[22].UpdateUnlockButtonText(playersDefenseDataController.RuntimeDefenseData.magicalDamageResistUnlockCost); // Magical Damage Resist
-                levelUpMenuEntryControllers[23].UpdateUnlockButtonText(playersDefenseDataController.RuntimeDefenseData.energyDamageResistUnlockCost); // Energy Damage Resist
-                levelUpMenuEntryControllers[24].UpdateUnlockButtonText(playersMovementDataController.RuntimeMovementData.groundSpeedUnlockCost); // Ground Speed
-                levelUpMenuEntryControllers[28].UpdateUnlockButtonText(playersMovementDataController.RuntimeMovementData.surfaceWaterSpeedUnlockCost); // Surface Water Speed
-                levelUpMenuEntryControllers[32].UpdateUnlockButtonText(playersMovementDataController.RuntimeMovementData.underwaterSpeedUnlockCost); // Underwater Speed
-                levelUpMenuEntryControllers[36].UpdateUnlockButtonText(playersMovementDataController.RuntimeMovementData.flyingSpeedUnlockCost); // Flying Speed
-                levelUpMenuEntryControllers[40].UpdateUnlockButtonText(playersMovementDataController.RuntimeMovementData.spaceTravelSpeedUnlockCost); // Space Travel Speed
+                levelUpMenuEntryControllers[1].UpdateUnlockButtonText(playersHealthStatContainer.runtimeHealthStats.healthRegenAmount); // Health Regen Amount
+                levelUpMenuEntryControllers[3].UpdateUnlockButtonText(playersHealthStatContainer.runtimeHealthStats.maximumEnergyShields); // Max Energy Shields
+                levelUpMenuEntryControllers[4].UpdateUnlockButtonText(playersHealthStatContainer.runtimeHealthStats.energyShieldsRegenAmount); // Energy Shield Regen Amount
+                levelUpMenuEntryControllers[6].UpdateUnlockButtonText(playersDefenseStatContainer.runtimeDefenseStats.parryChance); // Parry Chance
+                levelUpMenuEntryControllers[8].UpdateUnlockButtonText(playersDefenseStatContainer.runtimeDefenseStats.counterAttackChance); // Counter Attack Chance
+                levelUpMenuEntryControllers[9].UpdateUnlockButtonText(playersDefenseStatContainer.runtimeDefenseStats.blockChance); // Block Chance
+                levelUpMenuEntryControllers[11].UpdateUnlockButtonText(playersDefenseStatContainer.runtimeDefenseStats.blockAmount); // Block Amount
+                levelUpMenuEntryControllers[12].UpdateUnlockButtonText(playersDefenseStatContainer.runtimeDefenseStats.reflectAttackChance); // Reflect Attack Chance
+                levelUpMenuEntryControllers[13].UpdateUnlockButtonText(playersDefenseStatContainer.runtimeDefenseStats.reflectAttackAngle); // Reflect Attack Angle
+                levelUpMenuEntryControllers[14].UpdateUnlockButtonText(playersDefenseStatContainer.runtimeDefenseStats.dodgeChance); // Dodge Chance
+                levelUpMenuEntryControllers[16].UpdateUnlockButtonText(playersDefenseStatContainer.runtimeDefenseStats.armorValue); // Armor Value
+                levelUpMenuEntryControllers[17].UpdateUnlockButtonText(playersDefenseStatContainer.runtimeDefenseStats.thornsAmount); // Thorns Amount
+                levelUpMenuEntryControllers[18].UpdateUnlockButtonText(playersDefenseStatContainer.runtimeDefenseStats.criticalHitChanceResist); // Critical Hit Chance Resist
+                levelUpMenuEntryControllers[19].UpdateUnlockButtonText(playersDefenseStatContainer.runtimeDefenseStats.criticalHitDamageResist); // Critical Hit Damage Resist
+                levelUpMenuEntryControllers[20].UpdateUnlockButtonText(playersDefenseStatContainer.runtimeDefenseStats.statusEffectResist); // Status Effect Resist
+                levelUpMenuEntryControllers[21].UpdateUnlockButtonText(playersDefenseStatContainer.runtimeDefenseStats.physicalDamageResist); // Physical Damage Resist
+                levelUpMenuEntryControllers[22].UpdateUnlockButtonText(playersDefenseStatContainer.runtimeDefenseStats.magicalDamageResist); // Magical Damage Resist
+                levelUpMenuEntryControllers[23].UpdateUnlockButtonText(playersDefenseStatContainer.runtimeDefenseStats.energyDamageResist); // Energy Damage Resist
+                levelUpMenuEntryControllers[24].UpdateUnlockButtonText(playersMovementStatContainer.runtimeMovementStats.groundSpeed); // Ground Speed
+                levelUpMenuEntryControllers[28].UpdateUnlockButtonText(playersMovementStatContainer.runtimeMovementStats.surfaceWaterSpeed); // Surface Water Speed
+                levelUpMenuEntryControllers[32].UpdateUnlockButtonText(playersMovementStatContainer.runtimeMovementStats.underwaterSpeed); // Underwater Speed
+                levelUpMenuEntryControllers[36].UpdateUnlockButtonText(playersMovementStatContainer.runtimeMovementStats.flyingSpeed); // Flying Speed
+                levelUpMenuEntryControllers[40].UpdateUnlockButtonText(playersMovementStatContainer.runtimeMovementStats.spaceTravelSpeed); // Space Travel Speed
 
-                // EXPERIENCE COST
-                levelUpMenuEntryControllers[0].UpdatePurchaseButtonText(playersHealthDataController.RuntimeHealthData.maximumHealthExpCost); // Maximum Health
-                levelUpMenuEntryControllers[1].UpdatePurchaseButtonText(playersHealthDataController.RuntimeHealthData.healthRegenAmountExpCost); // Health Regen Amount
-                levelUpMenuEntryControllers[2].UpdatePurchaseButtonText(playersHealthDataController.RuntimeHealthData.healthRegenCooldownExpCost); // Health Regen Cooldown
-                levelUpMenuEntryControllers[3].UpdatePurchaseButtonText(playersHealthDataController.RuntimeHealthData.maximumEnergyShieldExpCost); // Max Energy Shields
-                levelUpMenuEntryControllers[4].UpdatePurchaseButtonText(playersHealthDataController.RuntimeHealthData.energyShieldsRegenAmountExpCost); // Energy Shield Regen Amount
-                levelUpMenuEntryControllers[5].UpdatePurchaseButtonText(playersHealthDataController.RuntimeHealthData.energyShieldsRegenCooldownExpCost); // Energy Shield Regen Cooldown
-                levelUpMenuEntryControllers[6].UpdatePurchaseButtonText(playersDefenseDataController.RuntimeDefenseData.parryChanceExpCost); // Parry Chance
-                levelUpMenuEntryControllers[7].UpdatePurchaseButtonText(playersDefenseDataController.RuntimeDefenseData.parryCooldownExpCost); // Parry Cooldown
-                levelUpMenuEntryControllers[8].UpdatePurchaseButtonText(playersDefenseDataController.RuntimeDefenseData.counterAttackChanceExpCost); // Counter Attack Chance
-                levelUpMenuEntryControllers[9].UpdatePurchaseButtonText(playersDefenseDataController.RuntimeDefenseData.blockChanceExpCost); // Block Chance
-                levelUpMenuEntryControllers[10].UpdatePurchaseButtonText(playersDefenseDataController.RuntimeDefenseData.blockCooldownExpCost); // Block Cooldown
-                levelUpMenuEntryControllers[11].UpdatePurchaseButtonText(playersDefenseDataController.RuntimeDefenseData.blockAmountExpCost); // Block Amount
-                levelUpMenuEntryControllers[12].UpdatePurchaseButtonText(playersDefenseDataController.RuntimeDefenseData.reflectAttackChanceExpCost); // Reflect Attack Chance
-                levelUpMenuEntryControllers[13].UpdatePurchaseButtonText(playersDefenseDataController.RuntimeDefenseData.reflectAttackChanceExpCost); // Reflect Attack Angle
-                levelUpMenuEntryControllers[14].UpdatePurchaseButtonText(playersDefenseDataController.RuntimeDefenseData.dodgeChanceExpCost); // Dodge Chance
-                levelUpMenuEntryControllers[15].UpdatePurchaseButtonText(playersDefenseDataController.RuntimeDefenseData.dodgeCooldownExpCost); // Dodge Cooldown
-                levelUpMenuEntryControllers[16].UpdatePurchaseButtonText(playersDefenseDataController.RuntimeDefenseData.armorValueExpCost); // Armor Value
-                levelUpMenuEntryControllers[17].UpdatePurchaseButtonText(playersDefenseDataController.RuntimeDefenseData.thornsAmountExpCost); // Thorns Amount
-                levelUpMenuEntryControllers[18].UpdatePurchaseButtonText(playersDefenseDataController.RuntimeDefenseData.criticalHitChanceResistExpCost); // Critical Hit Chance Resist
-                levelUpMenuEntryControllers[19].UpdatePurchaseButtonText(playersDefenseDataController.RuntimeDefenseData.criticalHitDamageResistExpCost); // Critical Hit Damage Resist
-                levelUpMenuEntryControllers[20].UpdatePurchaseButtonText(playersDefenseDataController.RuntimeDefenseData.statusEffectResistExpCost); // Status Effect Resist
-                levelUpMenuEntryControllers[21].UpdatePurchaseButtonText(playersDefenseDataController.RuntimeDefenseData.physicalDamageResistExpCost); // Physical Damage Resist
-                levelUpMenuEntryControllers[22].UpdatePurchaseButtonText(playersDefenseDataController.RuntimeDefenseData.magicalDamageResistExpCost); // Magical Damage Resist
-                levelUpMenuEntryControllers[23].UpdatePurchaseButtonText(playersDefenseDataController.RuntimeDefenseData.energyDamageResistExpCost); // Energy Damage Resist
-                levelUpMenuEntryControllers[24].UpdatePurchaseButtonText(playersMovementDataController.RuntimeMovementData.groundSpeedExpCost); // Ground Speed
-                levelUpMenuEntryControllers[25].UpdatePurchaseButtonText(playersMovementDataController.RuntimeMovementData.groundTurningSpeedExpCost); // Ground Turning Speed
-                levelUpMenuEntryControllers[26].UpdatePurchaseButtonText(playersMovementDataController.RuntimeMovementData.groundAccelerationSpeedExpCost); // Ground Acceleration Speed
-                levelUpMenuEntryControllers[27].UpdatePurchaseButtonText(playersMovementDataController.RuntimeMovementData.groundBrakingSpeedExpCost); // Ground Braking Speed
-                levelUpMenuEntryControllers[28].UpdatePurchaseButtonText(playersMovementDataController.RuntimeMovementData.surfaceWaterSpeedExpCost); // Surface Water Speed
-                levelUpMenuEntryControllers[29].UpdatePurchaseButtonText(playersMovementDataController.RuntimeMovementData.surfaceWaterTurningSpeedExpCost); // Surface Water Turning Speed
-                levelUpMenuEntryControllers[30].UpdatePurchaseButtonText(playersMovementDataController.RuntimeMovementData.surfaceWaterAccelerationSpeedExpCost); // Surface Water Acceleration Speed
-                levelUpMenuEntryControllers[31].UpdatePurchaseButtonText(playersMovementDataController.RuntimeMovementData.surfaceWaterBrakingSpeedExpCost); // Surface Water Braking Speed
-                levelUpMenuEntryControllers[32].UpdatePurchaseButtonText(playersMovementDataController.RuntimeMovementData.underwaterSpeedExpCost); // Underwater Speed
-                levelUpMenuEntryControllers[33].UpdatePurchaseButtonText(playersMovementDataController.RuntimeMovementData.underwaterTurningSpeedExpCost); // Underwater Turning Speed
-                levelUpMenuEntryControllers[34].UpdatePurchaseButtonText(playersMovementDataController.RuntimeMovementData.underwaterAccelerationSpeedExpCost); // Underwater Acceleration Speed
-                levelUpMenuEntryControllers[35].UpdatePurchaseButtonText(playersMovementDataController.RuntimeMovementData.underwaterBrakingSpeedExpCost); // Underwater Braking Speed
-                levelUpMenuEntryControllers[36].UpdatePurchaseButtonText(playersMovementDataController.RuntimeMovementData.flyingSpeedExpCost); // Flying Speed
-                levelUpMenuEntryControllers[37].UpdatePurchaseButtonText(playersMovementDataController.RuntimeMovementData.flyingTurningSpeedExpCost); // Flying Turning Speed
-                levelUpMenuEntryControllers[38].UpdatePurchaseButtonText(playersMovementDataController.RuntimeMovementData.flyingAccelerationSpeedExpCost); // Flying Acceleration Speed
-                levelUpMenuEntryControllers[39].UpdatePurchaseButtonText(playersMovementDataController.RuntimeMovementData.flyingBrakingSpeedExpCost); // Flying Braking Speed
-                levelUpMenuEntryControllers[40].UpdatePurchaseButtonText(playersMovementDataController.RuntimeMovementData.spaceTravelSpeedExpCost); // Space Travel Speed
-                levelUpMenuEntryControllers[41].UpdatePurchaseButtonText(playersMovementDataController.RuntimeMovementData.spaceTravelTurningSpeedExpCost); // Space Travel Turning Speed
-                levelUpMenuEntryControllers[42].UpdatePurchaseButtonText(playersMovementDataController.RuntimeMovementData.spaceTravelAccelerationSpeedExpCost); // Space Travel Acceleration Speed
-                levelUpMenuEntryControllers[43].UpdatePurchaseButtonText(playersMovementDataController.RuntimeMovementData.spaceTravelBrakingSpeedExpCost); // Space Travel Braking Speed
-
-                // STATS LEVEL VALUE
-                levelUpMenuEntryControllers[0].UpdateStatsLevelValueText(playersHealthDataController.RuntimeHealthData.MaximumHealth); // Maximum Health
-                levelUpMenuEntryControllers[1].UpdateStatsLevelValueText(playersHealthDataController.RuntimeHealthData.HealthRegenAmount); // Health Regen Amount
-                levelUpMenuEntryControllers[2].UpdateStatsLevelValueText(playersHealthDataController.RuntimeHealthData.HealthRegenCooldown); // Health Regen Cooldown
-                levelUpMenuEntryControllers[3].UpdateStatsLevelValueText(playersHealthDataController.RuntimeHealthData.MaximumEnergyShields); // Max Energy Shields
-                levelUpMenuEntryControllers[4].UpdateStatsLevelValueText(playersHealthDataController.RuntimeHealthData.EnergyShieldRegenAmount); // Energy Shield Regen Amount
-                levelUpMenuEntryControllers[5].UpdateStatsLevelValueText(playersHealthDataController.RuntimeHealthData.EnergyShieldRegenCooldown); // Energy Shield Regen Cooldown
-                levelUpMenuEntryControllers[6].UpdateStatsLevelValueText(playersDefenseDataController.RuntimeDefenseData.ParryChance); // Parry Chance
-                levelUpMenuEntryControllers[7].UpdateStatsLevelValueText(playersDefenseDataController.RuntimeDefenseData.ParryCooldown); // Parry Cooldown
-                levelUpMenuEntryControllers[8].UpdateStatsLevelValueText(playersDefenseDataController.RuntimeDefenseData.CounterAttackChance); // Counter Attack Chance
-                levelUpMenuEntryControllers[9].UpdateStatsLevelValueText(playersDefenseDataController.RuntimeDefenseData.BlockChance); // Block Chance
-                levelUpMenuEntryControllers[10].UpdateStatsLevelValueText(playersDefenseDataController.RuntimeDefenseData.BlockCooldown); // Block Cooldown
-                levelUpMenuEntryControllers[11].UpdateStatsLevelValueText(playersDefenseDataController.RuntimeDefenseData.BlockAmount); // Block Amount
-                levelUpMenuEntryControllers[12].UpdateStatsLevelValueText(playersDefenseDataController.RuntimeDefenseData.ReflectAttackChance); // Reflect Attack Chance
-                levelUpMenuEntryControllers[13].UpdateStatsLevelValueText(playersDefenseDataController.RuntimeDefenseData.ReflectAttackChance); // Reflect Attack Angle
-                levelUpMenuEntryControllers[14].UpdateStatsLevelValueText(playersDefenseDataController.RuntimeDefenseData.DodgeChance); // Dodge Chance
-                levelUpMenuEntryControllers[15].UpdateStatsLevelValueText(playersDefenseDataController.RuntimeDefenseData.DodgeCooldown); // Dodge Cooldown
-                levelUpMenuEntryControllers[16].UpdateStatsLevelValueText(playersDefenseDataController.RuntimeDefenseData.ArmorValue); // Armor Value
-                levelUpMenuEntryControllers[17].UpdateStatsLevelValueText(playersDefenseDataController.RuntimeDefenseData.ThornsAmount); // Thorns Amount
-                levelUpMenuEntryControllers[18].UpdateStatsLevelValueText(playersDefenseDataController.RuntimeDefenseData.CriticalHitChanceResist); // Critical Hit Chance Resist
-                levelUpMenuEntryControllers[19].UpdateStatsLevelValueText(playersDefenseDataController.RuntimeDefenseData.CriticalHitDamageResist); // Critical Hit Damage Resist
-                levelUpMenuEntryControllers[20].UpdateStatsLevelValueText(playersDefenseDataController.RuntimeDefenseData.StatusEffectResist); // Status Effect Resist
-                levelUpMenuEntryControllers[21].UpdateStatsLevelValueText(playersDefenseDataController.RuntimeDefenseData.PhysicalDamageResist); // Physical Damage Resist
-                levelUpMenuEntryControllers[22].UpdateStatsLevelValueText(playersDefenseDataController.RuntimeDefenseData.MagicalDamageResist); // Magical Damage Resist
-                levelUpMenuEntryControllers[23].UpdateStatsLevelValueText(playersDefenseDataController.RuntimeDefenseData.EnergyDamageResist); // Energy Damage Resist
-                levelUpMenuEntryControllers[24].UpdateStatsLevelValueText(playersMovementDataController.RuntimeMovementData.GroundSpeed); // Ground Speed
-                levelUpMenuEntryControllers[25].UpdateStatsLevelValueText(playersMovementDataController.RuntimeMovementData.GroundTurningSpeed); // Ground Turning Speed
-                levelUpMenuEntryControllers[26].UpdateStatsLevelValueText(playersMovementDataController.RuntimeMovementData.GroundAccelerationSpeed); // Ground Acceleration Speed
-                levelUpMenuEntryControllers[27].UpdateStatsLevelValueText(playersMovementDataController.RuntimeMovementData.GroundBrakingSpeed); // Ground Braking Speed
-                levelUpMenuEntryControllers[28].UpdateStatsLevelValueText(playersMovementDataController.RuntimeMovementData.SurfaceWaterSpeed); // Surface Water Speed
-                levelUpMenuEntryControllers[29].UpdateStatsLevelValueText(playersMovementDataController.RuntimeMovementData.SurfaceWaterTurningSpeed); // Surface Water Turning Speed
-                levelUpMenuEntryControllers[30].UpdateStatsLevelValueText(playersMovementDataController.RuntimeMovementData.SurfaceWaterAccelerationSpeed); // Surface Water Acceleration Speed
-                levelUpMenuEntryControllers[31].UpdateStatsLevelValueText(playersMovementDataController.RuntimeMovementData.SurfaceWaterBrakingSpeed); // Surface Water Braking Speed
-                levelUpMenuEntryControllers[32].UpdateStatsLevelValueText(playersMovementDataController.RuntimeMovementData.UnderwaterSpeed); // Underwater Speed
-                levelUpMenuEntryControllers[33].UpdateStatsLevelValueText(playersMovementDataController.RuntimeMovementData.UnderwaterTurningSpeed); // Underwater Turning Speed
-                levelUpMenuEntryControllers[34].UpdateStatsLevelValueText(playersMovementDataController.RuntimeMovementData.UnderwaterAccelerationSpeed); // Underwater Acceleration Speed
-                levelUpMenuEntryControllers[35].UpdateStatsLevelValueText(playersMovementDataController.RuntimeMovementData.UnderwaterBrakingSpeed); // Underwater Braking Speed
-                levelUpMenuEntryControllers[36].UpdateStatsLevelValueText(playersMovementDataController.RuntimeMovementData.FlyingSpeed); // Flying Speed
-                levelUpMenuEntryControllers[37].UpdateStatsLevelValueText(playersMovementDataController.RuntimeMovementData.FlyingTurningSpeed); // Flying Turning Speed
-                levelUpMenuEntryControllers[38].UpdateStatsLevelValueText(playersMovementDataController.RuntimeMovementData.FlyingAccelerationSpeed); // Flying Acceleration Speed
-                levelUpMenuEntryControllers[39].UpdateStatsLevelValueText(playersMovementDataController.RuntimeMovementData.FlyingBrakingSpeed); // Flying Braking Speed
-                levelUpMenuEntryControllers[40].UpdateStatsLevelValueText(playersMovementDataController.RuntimeMovementData.SpaceTravelSpeed); // Space Travel Speed
-                levelUpMenuEntryControllers[41].UpdateStatsLevelValueText(playersMovementDataController.RuntimeMovementData.SpaceTravelTurningSpeed); // Space Travel Turning Speed
-                levelUpMenuEntryControllers[42].UpdateStatsLevelValueText(playersMovementDataController.RuntimeMovementData.SpaceTravelAccelerationSpeed); // Space Travel Acceleration Speed
-                levelUpMenuEntryControllers[43].UpdateStatsLevelValueText(playersMovementDataController.RuntimeMovementData.SpaceTravelBrakingSpeed); // Space Travel Braking Speed
+                // EXPERIENCE COST AND STATS LEVEL VALUE
+                levelUpMenuEntryControllers[0].UpdateMenuEntry(playersHealthStatContainer.runtimeHealthStats.maximumHealth); // Maximum Health
+                levelUpMenuEntryControllers[1].UpdateMenuEntry(playersHealthStatContainer.runtimeHealthStats.healthRegenAmount); // Health Regen Amount
+                levelUpMenuEntryControllers[2].UpdateMenuEntry(playersHealthStatContainer.runtimeHealthStats.healthRegenCooldown); // Health Regen Cooldown
+                levelUpMenuEntryControllers[3].UpdateMenuEntry(playersHealthStatContainer.runtimeHealthStats.maximumEnergyShields); // Max Energy Shields
+                levelUpMenuEntryControllers[4].UpdateMenuEntry(playersHealthStatContainer.runtimeHealthStats.energyShieldsRegenAmount); // Energy Shield Regen Amount
+                levelUpMenuEntryControllers[5].UpdateMenuEntry(playersHealthStatContainer.runtimeHealthStats.energyShieldsRegenCooldown); // Energy Shield Regen Cooldown
+                levelUpMenuEntryControllers[6].UpdateMenuEntry(playersDefenseStatContainer.runtimeDefenseStats.parryChance); // Parry Chance
+                levelUpMenuEntryControllers[7].UpdateMenuEntry(playersDefenseStatContainer.runtimeDefenseStats.parryCooldown); // Parry Cooldown
+                levelUpMenuEntryControllers[8].UpdateMenuEntry(playersDefenseStatContainer.runtimeDefenseStats.counterAttackChance); // Counter Attack Chance
+                levelUpMenuEntryControllers[9].UpdateMenuEntry(playersDefenseStatContainer.runtimeDefenseStats.blockChance); // Block Chance
+                levelUpMenuEntryControllers[10].UpdateMenuEntry(playersDefenseStatContainer.runtimeDefenseStats.blockCooldown); // Block Cooldown
+                levelUpMenuEntryControllers[11].UpdateMenuEntry(playersDefenseStatContainer.runtimeDefenseStats.blockAmount); // Block Amount
+                levelUpMenuEntryControllers[12].UpdateMenuEntry(playersDefenseStatContainer.runtimeDefenseStats.reflectAttackChance); // Reflect Attack Chance
+                levelUpMenuEntryControllers[13].UpdateMenuEntry(playersDefenseStatContainer.runtimeDefenseStats.reflectAttackChance); // Reflect Attack Angle
+                levelUpMenuEntryControllers[14].UpdateMenuEntry(playersDefenseStatContainer.runtimeDefenseStats.dodgeChance); // Dodge Chance
+                levelUpMenuEntryControllers[15].UpdateMenuEntry(playersDefenseStatContainer.runtimeDefenseStats.dodgeCooldown); // Dodge Cooldown
+                levelUpMenuEntryControllers[16].UpdateMenuEntry(playersDefenseStatContainer.runtimeDefenseStats.armorValue); // Armor Value
+                levelUpMenuEntryControllers[17].UpdateMenuEntry(playersDefenseStatContainer.runtimeDefenseStats.thornsAmount); // Thorns Amount
+                levelUpMenuEntryControllers[18].UpdateMenuEntry(playersDefenseStatContainer.runtimeDefenseStats.criticalHitChanceResist); // Critical Hit Chance Resist
+                levelUpMenuEntryControllers[19].UpdateMenuEntry(playersDefenseStatContainer.runtimeDefenseStats.criticalHitDamageResist); // Critical Hit Damage Resist
+                levelUpMenuEntryControllers[20].UpdateMenuEntry(playersDefenseStatContainer.runtimeDefenseStats.statusEffectResist); // Status Effect Resist
+                levelUpMenuEntryControllers[21].UpdateMenuEntry(playersDefenseStatContainer.runtimeDefenseStats.physicalDamageResist); // Physical Damage Resist
+                levelUpMenuEntryControllers[22].UpdateMenuEntry(playersDefenseStatContainer.runtimeDefenseStats.magicalDamageResist); // Magical Damage Resist
+                levelUpMenuEntryControllers[23].UpdateMenuEntry(playersDefenseStatContainer.runtimeDefenseStats.energyDamageResist); // Energy Damage Resist
+                levelUpMenuEntryControllers[24].UpdateMenuEntry(playersMovementStatContainer.runtimeMovementStats.groundSpeed); // Ground Speed
+                levelUpMenuEntryControllers[25].UpdateMenuEntry(playersMovementStatContainer.runtimeMovementStats.groundTurningSpeed); // Ground Turning Speed
+                levelUpMenuEntryControllers[26].UpdateMenuEntry(playersMovementStatContainer.runtimeMovementStats.groundAccelerationSpeed); // Ground Acceleration Speed
+                levelUpMenuEntryControllers[27].UpdateMenuEntry(playersMovementStatContainer.runtimeMovementStats.groundBrakingSpeed); // Ground Braking Speed
+                levelUpMenuEntryControllers[28].UpdateMenuEntry(playersMovementStatContainer.runtimeMovementStats.surfaceWaterSpeed); // Surface Water Speed
+                levelUpMenuEntryControllers[29].UpdateMenuEntry(playersMovementStatContainer.runtimeMovementStats.surfaceWaterTurningSpeed); // Surface Water Turning Speed
+                levelUpMenuEntryControllers[30].UpdateMenuEntry(playersMovementStatContainer.runtimeMovementStats.surfaceWaterAccelerationSpeed); // Surface Water Acceleration Speed
+                levelUpMenuEntryControllers[31].UpdateMenuEntry(playersMovementStatContainer.runtimeMovementStats.surfaceWaterBrakingSpeed); // Surface Water Braking Speed
+                levelUpMenuEntryControllers[32].UpdateMenuEntry(playersMovementStatContainer.runtimeMovementStats.underwaterSpeed); // Underwater Speed
+                levelUpMenuEntryControllers[33].UpdateMenuEntry(playersMovementStatContainer.runtimeMovementStats.underwaterTurningSpeed); // Underwater Turning Speed
+                levelUpMenuEntryControllers[34].UpdateMenuEntry(playersMovementStatContainer.runtimeMovementStats.underwaterAccelerationSpeed); // Underwater Acceleration Speed
+                levelUpMenuEntryControllers[35].UpdateMenuEntry(playersMovementStatContainer.runtimeMovementStats.underwaterBrakingSpeed); // Underwater Braking Speed
+                levelUpMenuEntryControllers[36].UpdateMenuEntry(playersMovementStatContainer.runtimeMovementStats.flyingSpeed); // Flying Speed
+                levelUpMenuEntryControllers[37].UpdateMenuEntry(playersMovementStatContainer.runtimeMovementStats.flyingTurningSpeed); // Flying Turning Speed
+                levelUpMenuEntryControllers[38].UpdateMenuEntry(playersMovementStatContainer.runtimeMovementStats.flyingAccelerationSpeed); // Flying Acceleration Speed
+                levelUpMenuEntryControllers[39].UpdateMenuEntry(playersMovementStatContainer.runtimeMovementStats.flyingBrakingSpeed); // Flying Braking Speed
+                levelUpMenuEntryControllers[40].UpdateMenuEntry(playersMovementStatContainer.runtimeMovementStats.spaceTravelSpeed); // Space Travel Speed
+                levelUpMenuEntryControllers[41].UpdateMenuEntry(playersMovementStatContainer.runtimeMovementStats.spaceTravelTurningSpeed); // Space Travel Turning Speed
+                levelUpMenuEntryControllers[42].UpdateMenuEntry(playersMovementStatContainer.runtimeMovementStats.spaceTravelAccelerationSpeed); // Space Travel Acceleration Speed
+                levelUpMenuEntryControllers[43].UpdateMenuEntry(playersMovementStatContainer.runtimeMovementStats.spaceTravelBrakingSpeed); // Space Travel Braking Speed
             }
 
             private void SetDefaultMenuState()
             {
-                levelUpMenuEntryControllers[0].UnlockPurchaseButton(); // Max Health
+                levelUpMenuEntryControllers[0].UnlockPurchaseButton(playersHealthStatContainer.runtimeHealthStats.maximumHealth); // Max Health
                 levelUpMenuEntryControllers[2].gameObject.SetActive(false); // Health Regen Cooldown
                 levelUpMenuEntryControllers[4].gameObject.SetActive(false); // Energy Shield Regen Amount
                 levelUpMenuEntryControllers[5].gameObject.SetActive(false); // Energy Shield Regen Cooldown
@@ -220,659 +180,750 @@ namespace ShapeDefender
                     openCloseButtonsText.SetText("<");
                 }
 
-                float duration = 2f;
-                menuSlidingCoroutine = StartCoroutine(MoveRoutine(targetPosition, duration));
+                if (currentMenuDuration > 0f) { targetMenuDuration = currentMenuDuration; }
+                else { targetMenuDuration = menuDefaultDuration; }
+
+                currentMenuDuration = 0f;
+                menuSlidingCoroutine = StartCoroutine(MoveRoutine(targetPosition));
             }
 
-            private void UpdateExperiencePointTrackerText()
-            {
-                experienceText.SetText($"{playersExperiencePoints:F2}");
-            }
-
-            private IEnumerator MoveRoutine(Vector2 targetPosition, float duration)
+            private IEnumerator MoveRoutine(Vector2 targetPosition)
             {
                 Vector2 startPosition = menusRectTransform.anchoredPosition;
-                float elapsedTime = 0f;
 
-                while (elapsedTime < duration)
+                while (currentMenuDuration < targetMenuDuration)
                 {
-                    elapsedTime += Time.deltaTime;
-                    float percentageComplete = elapsedTime / duration;
+                    currentMenuDuration += Time.deltaTime;
+                    float percentageComplete = currentMenuDuration / targetMenuDuration;
                     menusRectTransform.anchoredPosition = Vector2.Lerp(startPosition, targetPosition, percentageComplete);
                     yield return null;
                 }
 
                 menusRectTransform.anchoredPosition = targetPosition;
+                currentMenuDuration = 0f;
+            }
+
+            public void UpdateExperiencePointTrackerText()
+            {
+                experienceText.SetText($"{playersExperiencePoints:F2}");
             }
 
             // HEALTH RELATED UNLOCK AND LEVEL UP FUNCTIONS
             public void UnlockHealthRegenAmount()
             {
-                playersHealthDataController.UnlockHealthRegenAmount(ref playersExperiencePoints);
-                levelUpMenuEntryControllers[1].UnlockPurchaseButton(); // Health Regen Amount
-                levelUpMenuEntryControllers[2].UnlockPurchaseButton(); // Health Regen Cooldown
-                levelUpMenuEntryControllers[2].gameObject.SetActive(true); // Health Regen Cooldown
+                bool wasAbleToUnlock = LevelUpManager.Instance.AttemptToUnlockStat(ref playersExperiencePoints, playersHealthStatContainer.runtimeHealthStats.healthRegenAmount);
+                if (!wasAbleToUnlock) { return; }
 
-                levelUpMenuEntryControllers[1].UpdateStatsLevelValueText(playersHealthDataController.RuntimeHealthData.HealthRegenAmount); // Health Regen Amount
-                levelUpMenuEntryControllers[2].UpdateStatsLevelValueText(playersHealthDataController.RuntimeHealthData.HealthRegenCooldown); // Health Regen Cooldown
+                levelUpMenuEntryControllers[1].UnlockPurchaseButton(playersHealthStatContainer.runtimeHealthStats.healthRegenAmount); // Health Regen Amount
+                levelUpMenuEntryControllers[2].UnlockPurchaseButton(playersHealthStatContainer.runtimeHealthStats.healthRegenCooldown); // Health Regen Cooldown
+                levelUpMenuEntryControllers[2].gameObject.SetActive(true); // Health Regen Cooldown
                 UpdateExperiencePointTrackerText();
+                playersHealthStatContainer.runtimeHealthStats.currentHealthRegenCooldown = playersHealthStatContainer.runtimeHealthStats.healthRegenCooldown.StatValue;
             }
 
             public void UnlockMaximumEnergyShield()
             {
-                playersHealthDataController.UnlockMaximumEnergyShield(ref playersExperiencePoints);
-                levelUpMenuEntryControllers[3].UnlockPurchaseButton(); // Max Energy Shields
+                bool wasAbleToUnlock = LevelUpManager.Instance.AttemptToUnlockStat(ref playersExperiencePoints, playersHealthStatContainer.runtimeHealthStats.maximumEnergyShields);
+                if (!wasAbleToUnlock) { return; }
+
+                levelUpMenuEntryControllers[3].UnlockPurchaseButton(playersHealthStatContainer.runtimeHealthStats.maximumEnergyShields); // Max Energy Shields
                 levelUpMenuEntryControllers[4].gameObject.SetActive(true); // Energy Shield Regen Amount
-                levelUpMenuEntryControllers[3].UpdateStatsLevelValueText(playersHealthDataController.RuntimeHealthData.MaximumEnergyShields); // Max Energy Shields
                 UpdateExperiencePointTrackerText();
+                playersHealthStatContainer.ToggleStatusBars(true);
+                playersHealthStatContainer.UpdateStatusBars();
             }
 
             public void UnlockEnergyShieldRegenAmount()
             {
-                playersHealthDataController.UnlockEnergyShieldRegenAmount(ref playersExperiencePoints);
-                levelUpMenuEntryControllers[4].UnlockPurchaseButton(); // Energy Shield Regen Amount
-                levelUpMenuEntryControllers[5].UnlockPurchaseButton(); // Energy Shield Regen Cooldown
+                bool wasAbleToUnlock = LevelUpManager.Instance.AttemptToUnlockStat(ref playersExperiencePoints, playersHealthStatContainer.runtimeHealthStats.energyShieldsRegenAmount);
+                if (!wasAbleToUnlock) { return; }
+
+                levelUpMenuEntryControllers[4].UnlockPurchaseButton(playersHealthStatContainer.runtimeHealthStats.energyShieldsRegenAmount); // Energy Shield Regen Amount
+                levelUpMenuEntryControllers[5].UnlockPurchaseButton(playersHealthStatContainer.runtimeHealthStats.energyShieldsRegenCooldown); // Energy Shield Regen Cooldown
                 levelUpMenuEntryControllers[5].gameObject.SetActive(true); // Energy Shield Regen Cooldown
-                levelUpMenuEntryControllers[4].UpdateStatsLevelValueText(playersHealthDataController.RuntimeHealthData.EnergyShieldRegenAmount); // Energy Shield Regen Amount
-                levelUpMenuEntryControllers[5].UpdateStatsLevelValueText(playersHealthDataController.RuntimeHealthData.EnergyShieldRegenCooldown); // Energy Shield Regen Cooldown
                 UpdateExperiencePointTrackerText();
+                playersHealthStatContainer.runtimeHealthStats.currentHealthRegenCooldown = playersHealthStatContainer.runtimeHealthStats.energyShieldsRegenCooldown.StatValue;
             }
 
             public void LevelUpMaximumHealth()
             {
-                playersHealthDataController.LevelUpMaximumHealth(ref playersExperiencePoints);
-                levelUpMenuEntryControllers[0].UpdatePurchaseButtonText(playersHealthDataController.RuntimeHealthData.maximumHealthExpCost); // Maximum Health
-                levelUpMenuEntryControllers[0].UpdateStatsLevelValueText(playersHealthDataController.RuntimeHealthData.MaximumHealth); // Maximum Health
+                bool wasAbleToUnlock = LevelUpManager.Instance.AttemptToLevelUpStat(ref playersExperiencePoints, playersHealthStatContainer.runtimeHealthStats.maximumHealth);
+                if (!wasAbleToUnlock) { return; }
+
+                levelUpMenuEntryControllers[0].UpdateMenuEntry(playersHealthStatContainer.runtimeHealthStats.maximumHealth); // Maximum Health
                 UpdateExperiencePointTrackerText();
+                playersHealthStatContainer.UpdateStatusBars();
             }
 
             public void LevelUpHealthRegenAmount()
             {
-                playersHealthDataController.LevelUpHealthRegenAmount(ref playersExperiencePoints);
-                levelUpMenuEntryControllers[1].UpdatePurchaseButtonText(playersHealthDataController.RuntimeHealthData.healthRegenAmountExpCost); // Health Regen Amount
-                levelUpMenuEntryControllers[1].UpdateStatsLevelValueText(playersHealthDataController.RuntimeHealthData.HealthRegenAmount); // Health Regen Amount
+                bool wasAbleToUnlock = LevelUpManager.Instance.AttemptToLevelUpStat(ref playersExperiencePoints, playersHealthStatContainer.runtimeHealthStats.healthRegenAmount);
+                if (!wasAbleToUnlock) { return; }
+
+                levelUpMenuEntryControllers[1].UpdateMenuEntry(playersHealthStatContainer.runtimeHealthStats.healthRegenAmount); // Health Regen Amount
                 UpdateExperiencePointTrackerText();
             }
 
             public void LevelUpHealthRegenCooldown()
             {
-                playersHealthDataController.LevelUpHealthRegenCooldown(ref playersExperiencePoints);
-                levelUpMenuEntryControllers[2].UpdatePurchaseButtonText(playersHealthDataController.RuntimeHealthData.healthRegenCooldownExpCost); // Health Regen Cooldown
-                levelUpMenuEntryControllers[2].UpdateStatsLevelValueText(playersHealthDataController.RuntimeHealthData.HealthRegenCooldown); // Health Regen Cooldown
+                bool wasAbleToUnlock = LevelUpManager.Instance.AttemptToLevelUpStat(ref playersExperiencePoints, playersHealthStatContainer.runtimeHealthStats.healthRegenCooldown);
+                if (!wasAbleToUnlock) { return; }
+
+                levelUpMenuEntryControllers[2].UpdateMenuEntry(playersHealthStatContainer.runtimeHealthStats.healthRegenCooldown); // Health Regen Cooldown
+                playersHealthStatContainer.runtimeHealthStats.currentHealthRegenCooldown += playersHealthStatContainer.runtimeHealthStats.healthRegenCooldown.AdditiveStatValuePerLevel;
                 UpdateExperiencePointTrackerText();
+
+                if (playersHealthStatContainer.runtimeHealthStats.healthRegenCooldown.StatValue <= 0f)
+                {
+                    levelUpMenuEntryControllers[2].DisablePurchaseButton();
+                }
             }
 
             public void LevelUpMaximumEnergyShield()
             {
-                playersHealthDataController.LevelUpMaximumEnergyShield(ref playersExperiencePoints);
-                levelUpMenuEntryControllers[3].UpdatePurchaseButtonText(playersHealthDataController.RuntimeHealthData.maximumEnergyShieldExpCost); // Max Energy Shields
-                levelUpMenuEntryControllers[3].UpdateStatsLevelValueText(playersHealthDataController.RuntimeHealthData.MaximumEnergyShields); // Max Energy Shields
+                bool wasAbleToUnlock = LevelUpManager.Instance.AttemptToLevelUpStat(ref playersExperiencePoints, playersHealthStatContainer.runtimeHealthStats.maximumEnergyShields);
+                if (!wasAbleToUnlock) { return; }
+
+                levelUpMenuEntryControllers[3].UpdateMenuEntry(playersHealthStatContainer.runtimeHealthStats.maximumEnergyShields); // Max Energy Shields
                 UpdateExperiencePointTrackerText();
+                playersHealthStatContainer.ToggleStatusBars(true);
+                playersHealthStatContainer.UpdateStatusBars();
             }
 
             public void LevelUpEnergyShieldRegenAmount()
             {
-                playersHealthDataController.LevelUpEnergyShieldRegenAmount(ref playersExperiencePoints);
-                levelUpMenuEntryControllers[4].UpdatePurchaseButtonText(playersHealthDataController.RuntimeHealthData.energyShieldsRegenAmountExpCost); // Energy Shield Regen Amount
-                levelUpMenuEntryControllers[4].UpdateStatsLevelValueText(playersHealthDataController.RuntimeHealthData.EnergyShieldRegenAmount); // Energy Shield Regen Amount
+                bool wasAbleToUnlock = LevelUpManager.Instance.AttemptToLevelUpStat(ref playersExperiencePoints, playersHealthStatContainer.runtimeHealthStats.energyShieldsRegenAmount);
+                if (!wasAbleToUnlock) { return; }
+
+                levelUpMenuEntryControllers[4].UpdateMenuEntry(playersHealthStatContainer.runtimeHealthStats.energyShieldsRegenAmount); // Energy Shield Regen Amount
                 UpdateExperiencePointTrackerText();
             }
 
             public void LevelUpEnergyShieldRegenCooldown()
             {
-                playersHealthDataController.LevelUpEnergyShieldRegenCooldown(ref playersExperiencePoints);
-                levelUpMenuEntryControllers[5].UpdatePurchaseButtonText(playersHealthDataController.RuntimeHealthData.energyShieldsRegenCooldownExpCost); // Energy Shield Regen Cooldown
-                levelUpMenuEntryControllers[5].UpdateStatsLevelValueText(playersHealthDataController.RuntimeHealthData.EnergyShieldRegenCooldown); // Energy Shield Regen Cooldown
+                bool wasAbleToUnlock = LevelUpManager.Instance.AttemptToLevelUpStat(ref playersExperiencePoints, playersHealthStatContainer.runtimeHealthStats.energyShieldsRegenCooldown);
+                if (!wasAbleToUnlock) { return; }
+
+                levelUpMenuEntryControllers[5].UpdateMenuEntry(playersHealthStatContainer.runtimeHealthStats.energyShieldsRegenCooldown); // Energy Shield Regen Cooldown
+                playersHealthStatContainer.runtimeHealthStats.currentEnergyShieldsRegenCooldown += playersHealthStatContainer.runtimeHealthStats.energyShieldsRegenCooldown.AdditiveStatValuePerLevel;
                 UpdateExperiencePointTrackerText();
+
+                if (playersHealthStatContainer.runtimeHealthStats.energyShieldsRegenCooldown.StatValue <= 0f)
+                {
+                    levelUpMenuEntryControllers[5].DisablePurchaseButton();
+                }
             }
 
             // DEFENSE RELATED UNLOCK AND LEVEL UP FUNCTIONS
             public void UnlockParryChance()
             {
-                playersDefenseDataController.UnlockParryChance(ref playersExperiencePoints);
-                levelUpMenuEntryControllers[6].UnlockPurchaseButton(); // Parry Chance
-                levelUpMenuEntryControllers[7].UnlockPurchaseButton(); // Parry Cooldown
+                bool wasAbleToUnlock = LevelUpManager.Instance.AttemptToUnlockStat(ref playersExperiencePoints, playersDefenseStatContainer.runtimeDefenseStats.parryChance);
+                if (!wasAbleToUnlock) { return; }
+
+                levelUpMenuEntryControllers[6].UnlockPurchaseButton(playersDefenseStatContainer.runtimeDefenseStats.parryChance); // Parry Chance
+                levelUpMenuEntryControllers[7].UnlockPurchaseButton(playersDefenseStatContainer.runtimeDefenseStats.parryCooldown); // Parry Cooldown
                 levelUpMenuEntryControllers[7].gameObject.SetActive(true); // Parry Cooldown
                 levelUpMenuEntryControllers[8].gameObject.SetActive(true); // Counter Attack Chance
-                levelUpMenuEntryControllers[6].UpdateStatsLevelValueText(playersDefenseDataController.RuntimeDefenseData.ParryChance); // Parry Chance
-                levelUpMenuEntryControllers[7].UpdateStatsLevelValueText(playersDefenseDataController.RuntimeDefenseData.ParryCooldown); // Parry Cooldown
                 UpdateExperiencePointTrackerText();
             }
 
             public void UnlockCounterAttackChance()
             {
-                playersDefenseDataController.UnlockCounterAttackChance(ref playersExperiencePoints);
-                levelUpMenuEntryControllers[8].UnlockPurchaseButton(); // Counter Attack Chance
-                levelUpMenuEntryControllers[8].UpdateStatsLevelValueText(playersDefenseDataController.RuntimeDefenseData.CounterAttackChance); // Counter Attack Chance
+                bool wasAbleToUnlock = LevelUpManager.Instance.AttemptToUnlockStat(ref playersExperiencePoints, playersDefenseStatContainer.runtimeDefenseStats.counterAttackChance);
+                if (!wasAbleToUnlock) { return; }
+
+                levelUpMenuEntryControllers[8].UnlockPurchaseButton(playersDefenseStatContainer.runtimeDefenseStats.counterAttackChance); // Counter Attack Chance
                 UpdateExperiencePointTrackerText();
             }
 
             public void UnlockBlockChance()
             {
-                playersDefenseDataController.UnlockBlockChance(ref playersExperiencePoints);
-                levelUpMenuEntryControllers[9].UnlockPurchaseButton(); // Block Chance
-                levelUpMenuEntryControllers[10].UnlockPurchaseButton(); // Block Cooldown
+                bool wasAbleToUnlock = LevelUpManager.Instance.AttemptToUnlockStat(ref playersExperiencePoints, playersDefenseStatContainer.runtimeDefenseStats.blockChance);
+                if (!wasAbleToUnlock) { return; }
+
+                levelUpMenuEntryControllers[9].UnlockPurchaseButton(playersDefenseStatContainer.runtimeDefenseStats.blockChance); // Block Chance
+                levelUpMenuEntryControllers[10].UnlockPurchaseButton(playersDefenseStatContainer.runtimeDefenseStats.blockCooldown); // Block Cooldown
                 levelUpMenuEntryControllers[10].gameObject.SetActive(true); // Block Cooldown
                 levelUpMenuEntryControllers[11].gameObject.SetActive(true); // Block Amount
                 levelUpMenuEntryControllers[12].gameObject.SetActive(true); // Reflect Attack Chance
-                levelUpMenuEntryControllers[9].UpdateStatsLevelValueText(playersDefenseDataController.RuntimeDefenseData.BlockChance); // Block Chance
-                levelUpMenuEntryControllers[10].UpdateStatsLevelValueText(playersDefenseDataController.RuntimeDefenseData.BlockCooldown); // Block Cooldown
                 UpdateExperiencePointTrackerText();
             }
 
             public void UnlockBlockAmount()
             {
-                playersDefenseDataController.UnlockBlockAmount(ref playersExperiencePoints);
-                levelUpMenuEntryControllers[11].UnlockPurchaseButton(); // Block Amount
-                levelUpMenuEntryControllers[11].UpdateStatsLevelValueText(playersDefenseDataController.RuntimeDefenseData.BlockAmount); // Block Amount
+                bool wasAbleToUnlock = LevelUpManager.Instance.AttemptToUnlockStat(ref playersExperiencePoints, playersDefenseStatContainer.runtimeDefenseStats.blockAmount);
+                if (!wasAbleToUnlock) { return; }
+
+                levelUpMenuEntryControllers[11].UnlockPurchaseButton(playersDefenseStatContainer.runtimeDefenseStats.blockAmount); // Block Amount
                 UpdateExperiencePointTrackerText();
             }
 
             public void UnlockReflectAttackChance()
             {
-                playersDefenseDataController.UnlockReflectAttackChance(ref playersExperiencePoints);
-                levelUpMenuEntryControllers[12].UnlockPurchaseButton(); // Reflect Attack Chance
+                bool wasAbleToUnlock = LevelUpManager.Instance.AttemptToUnlockStat(ref playersExperiencePoints, playersDefenseStatContainer.runtimeDefenseStats.reflectAttackChance);
+                if (!wasAbleToUnlock) { return; }
+
+                levelUpMenuEntryControllers[12].UnlockPurchaseButton(playersDefenseStatContainer.runtimeDefenseStats.reflectAttackChance); // Reflect Attack Chance
                 levelUpMenuEntryControllers[13].gameObject.SetActive(true); // Reflect Attack Angle
-                levelUpMenuEntryControllers[12].UpdateStatsLevelValueText(playersDefenseDataController.RuntimeDefenseData.ReflectAttackChance); // Reflect Attack Chance
                 UpdateExperiencePointTrackerText();
             }
 
             public void UnlockReflectAttackAngle()
             {
-                playersDefenseDataController.UnlockReflectAttackAngle(ref playersExperiencePoints);
-                levelUpMenuEntryControllers[13].UnlockPurchaseButton(); // Reflect Attack Angle
-                levelUpMenuEntryControllers[13].UpdateStatsLevelValueText(playersDefenseDataController.RuntimeDefenseData.ReflectAttackChance); // Reflect Attack Angle
+                bool wasAbleToUnlock = LevelUpManager.Instance.AttemptToUnlockStat(ref playersExperiencePoints, playersDefenseStatContainer.runtimeDefenseStats.reflectAttackAngle);
+                if (!wasAbleToUnlock) { return; }
+
+                levelUpMenuEntryControllers[13].UnlockPurchaseButton(playersDefenseStatContainer.runtimeDefenseStats.reflectAttackAngle); // Reflect Attack Angle
                 UpdateExperiencePointTrackerText();
             }
 
             public void UnlockDodgeChance()
             {
-                playersDefenseDataController.UnlockDodgeChance(ref playersExperiencePoints);
-                levelUpMenuEntryControllers[14].UnlockPurchaseButton(); // Dodge Chance
-                levelUpMenuEntryControllers[15].UnlockPurchaseButton(); // Dodge Cooldown
+                bool wasAbleToUnlock = LevelUpManager.Instance.AttemptToUnlockStat(ref playersExperiencePoints, playersDefenseStatContainer.runtimeDefenseStats.dodgeChance);
+                if (!wasAbleToUnlock) { return; }
+
+                levelUpMenuEntryControllers[14].UnlockPurchaseButton(playersDefenseStatContainer.runtimeDefenseStats.dodgeChance); // Dodge Chance
+                levelUpMenuEntryControllers[15].UnlockPurchaseButton(playersDefenseStatContainer.runtimeDefenseStats.dodgeCooldown); // Dodge Cooldown
                 levelUpMenuEntryControllers[15].gameObject.SetActive(true); // Dodge Cooldown
-                levelUpMenuEntryControllers[14].UpdateStatsLevelValueText(playersDefenseDataController.RuntimeDefenseData.DodgeChance); // Dodge Chance
-                levelUpMenuEntryControllers[15].UpdateStatsLevelValueText(playersDefenseDataController.RuntimeDefenseData.DodgeCooldown); // Dodge Cooldown
                 UpdateExperiencePointTrackerText();
             }
 
             public void UnlockArmorValue()
             {
-                playersDefenseDataController.UnlockArmorValue(ref playersExperiencePoints);
-                levelUpMenuEntryControllers[16].UnlockPurchaseButton(); // Armor Value
-                levelUpMenuEntryControllers[16].UpdateStatsLevelValueText(playersDefenseDataController.RuntimeDefenseData.ArmorValue); // Armor Value
+                bool wasAbleToUnlock = LevelUpManager.Instance.AttemptToUnlockStat(ref playersExperiencePoints, playersDefenseStatContainer.runtimeDefenseStats.armorValue);
+                if (!wasAbleToUnlock) { return; }
+
+                levelUpMenuEntryControllers[16].UnlockPurchaseButton(playersDefenseStatContainer.runtimeDefenseStats.armorValue); // Armor Value
                 UpdateExperiencePointTrackerText();
             }
 
             public void UnlockThornsAmount()
             {
-                playersDefenseDataController.UnlockThornsAmount(ref playersExperiencePoints);
-                levelUpMenuEntryControllers[17].UnlockPurchaseButton(); // Thorns Amount
-                levelUpMenuEntryControllers[17].UpdateStatsLevelValueText(playersDefenseDataController.RuntimeDefenseData.ThornsAmount); // Thorns Amount
+                bool wasAbleToUnlock = LevelUpManager.Instance.AttemptToUnlockStat(ref playersExperiencePoints, playersDefenseStatContainer.runtimeDefenseStats.thornsAmount);
+                if (!wasAbleToUnlock) { return; }
+
+                levelUpMenuEntryControllers[17].UnlockPurchaseButton(playersDefenseStatContainer.runtimeDefenseStats.thornsAmount); // Thorns Amount
                 UpdateExperiencePointTrackerText();
             }
 
             public void UnlockCriticalHitChanceResist()
             {
-                playersDefenseDataController.UnlockCriticalHitChanceResist(ref playersExperiencePoints);
-                levelUpMenuEntryControllers[18].UnlockPurchaseButton(); // Critical Hit Chance Resist
-                levelUpMenuEntryControllers[18].UpdateStatsLevelValueText(playersDefenseDataController.RuntimeDefenseData.CriticalHitChanceResist); // Critical Hit Chance Resist
+                bool wasAbleToUnlock = LevelUpManager.Instance.AttemptToUnlockStat(ref playersExperiencePoints, playersDefenseStatContainer.runtimeDefenseStats.criticalHitChanceResist);
+                if (!wasAbleToUnlock) { return; }
+
+                levelUpMenuEntryControllers[18].UnlockPurchaseButton(playersDefenseStatContainer.runtimeDefenseStats.criticalHitChanceResist); // Critical Hit Chance Resist
                 UpdateExperiencePointTrackerText();
             }
 
             public void UnlockCriticalHitDamageResist()
             {
-                playersDefenseDataController.UnlockCriticalHitDamageResist(ref playersExperiencePoints);
-                levelUpMenuEntryControllers[19].UnlockPurchaseButton(); // Critical Hit Damage Resist
-                levelUpMenuEntryControllers[19].UpdateStatsLevelValueText(playersDefenseDataController.RuntimeDefenseData.CriticalHitDamageResist); // Critical Hit Damage Resist
+                bool wasAbleToUnlock = LevelUpManager.Instance.AttemptToUnlockStat(ref playersExperiencePoints, playersDefenseStatContainer.runtimeDefenseStats.criticalHitDamageResist);
+                if (!wasAbleToUnlock) { return; }
+
+                levelUpMenuEntryControllers[19].UnlockPurchaseButton(playersDefenseStatContainer.runtimeDefenseStats.criticalHitDamageResist); // Critical Hit Damage Resist
                 UpdateExperiencePointTrackerText();
             }
 
             public void UnlockStatusEffectResist()
             {
-                playersDefenseDataController.UnlockStatusEffectResist(ref playersExperiencePoints);
-                levelUpMenuEntryControllers[20].UnlockPurchaseButton(); // Status Effect Resist
-                levelUpMenuEntryControllers[20].UpdateStatsLevelValueText(playersDefenseDataController.RuntimeDefenseData.StatusEffectResist); // Status Effect Resist
+                bool wasAbleToUnlock = LevelUpManager.Instance.AttemptToUnlockStat(ref playersExperiencePoints, playersDefenseStatContainer.runtimeDefenseStats.statusEffectResist);
+                if (!wasAbleToUnlock) { return; }
+
+                levelUpMenuEntryControllers[20].UnlockPurchaseButton(playersDefenseStatContainer.runtimeDefenseStats.statusEffectResist); // Status Effect Resist
                 UpdateExperiencePointTrackerText();
             }
 
             public void UnlockPhysicalDamageResist()
             {
-                playersDefenseDataController.UnlockPhysicalDamageResist(ref playersExperiencePoints);
-                levelUpMenuEntryControllers[21].UnlockPurchaseButton(); // Physical Damage Resist
-                levelUpMenuEntryControllers[21].UpdateStatsLevelValueText(playersDefenseDataController.RuntimeDefenseData.PhysicalDamageResist); // Physical Damage Resist
+                bool wasAbleToUnlock = LevelUpManager.Instance.AttemptToUnlockStat(ref playersExperiencePoints, playersDefenseStatContainer.runtimeDefenseStats.physicalDamageResist);
+                if (!wasAbleToUnlock) { return; }
+
+                levelUpMenuEntryControllers[21].UnlockPurchaseButton(playersDefenseStatContainer.runtimeDefenseStats.physicalDamageResist); // Physical Damage Resist
                 UpdateExperiencePointTrackerText();
             }
 
             public void UnlockMagicalDamageResist()
             {
-                playersDefenseDataController.UnlockMagicalDamageResist(ref playersExperiencePoints);
-                levelUpMenuEntryControllers[22].UnlockPurchaseButton(); // Magical Damage Resist
-                levelUpMenuEntryControllers[22].UpdateStatsLevelValueText(playersDefenseDataController.RuntimeDefenseData.MagicalDamageResist); // Magical Damage Resist
+                bool wasAbleToUnlock = LevelUpManager.Instance.AttemptToUnlockStat(ref playersExperiencePoints, playersDefenseStatContainer.runtimeDefenseStats.magicalDamageResist);
+                if (!wasAbleToUnlock) { return; }
+
+                levelUpMenuEntryControllers[22].UnlockPurchaseButton(playersDefenseStatContainer.runtimeDefenseStats.magicalDamageResist); // Magical Damage Resist
                 UpdateExperiencePointTrackerText();
             }
 
             public void UnlockEnergyDamageResist()
             {
-                playersDefenseDataController.UnlockEnergyDamageResist(ref playersExperiencePoints);
-                levelUpMenuEntryControllers[23].UnlockPurchaseButton(); // Energy Damage Resist
-                levelUpMenuEntryControllers[23].UpdateStatsLevelValueText(playersDefenseDataController.RuntimeDefenseData.EnergyDamageResist); // Energy Damage Resist
+                bool wasAbleToUnlock = LevelUpManager.Instance.AttemptToUnlockStat(ref playersExperiencePoints, playersDefenseStatContainer.runtimeDefenseStats.energyDamageResist);
+                if (!wasAbleToUnlock) { return; }
+
+                levelUpMenuEntryControllers[23].UnlockPurchaseButton(playersDefenseStatContainer.runtimeDefenseStats.energyDamageResist); // Energy Damage Resist
                 UpdateExperiencePointTrackerText();
             }
 
             public void LevelUpParryChance()
             {
-                playersDefenseDataController.LevelUpParryChance(ref playersExperiencePoints);
-                levelUpMenuEntryControllers[6].UpdatePurchaseButtonText(playersDefenseDataController.RuntimeDefenseData.parryChanceExpCost); // Parry Chance
-                levelUpMenuEntryControllers[6].UpdateStatsLevelValueText(playersDefenseDataController.RuntimeDefenseData.ParryChance); // Parry Chance
+                bool wasAbleToUnlock = LevelUpManager.Instance.AttemptToLevelUpStat(ref playersExperiencePoints, playersDefenseStatContainer.runtimeDefenseStats.parryChance);
+                if (!wasAbleToUnlock) { return; }
+
+                levelUpMenuEntryControllers[6].UpdateMenuEntry(playersDefenseStatContainer.runtimeDefenseStats.parryChance); // Parry Chance
                 UpdateExperiencePointTrackerText();
             }
 
             public void LevelUpParryCooldown()
             {
-                playersDefenseDataController.LevelUpParryCooldown(ref playersExperiencePoints);
-                levelUpMenuEntryControllers[7].UpdatePurchaseButtonText(playersDefenseDataController.RuntimeDefenseData.parryCooldownExpCost); // Parry Cooldown
-                levelUpMenuEntryControllers[7].UpdateStatsLevelValueText(playersDefenseDataController.RuntimeDefenseData.ParryCooldown); // Parry Cooldown
+                bool wasAbleToUnlock = LevelUpManager.Instance.AttemptToLevelUpStat(ref playersExperiencePoints, playersDefenseStatContainer.runtimeDefenseStats.parryCooldown);
+                if (!wasAbleToUnlock) { return; }
+
+                levelUpMenuEntryControllers[7].UpdateMenuEntry(playersDefenseStatContainer.runtimeDefenseStats.parryCooldown); // Parry Cooldown
+                playersDefenseStatContainer.runtimeDefenseStats.currentParryCooldown += playersDefenseStatContainer.runtimeDefenseStats.parryCooldown.AdditiveStatValuePerLevel;
                 UpdateExperiencePointTrackerText();
+
+                if (playersDefenseStatContainer.runtimeDefenseStats.parryCooldown.StatValue <= 0f)
+                {
+                    levelUpMenuEntryControllers[7].DisablePurchaseButton();
+                }
             }
 
             public void LevelUpCounterAttackChance()
             {
-                playersDefenseDataController.LevelUpCounterAttackChance(ref playersExperiencePoints);
-                levelUpMenuEntryControllers[8].UpdatePurchaseButtonText(playersDefenseDataController.RuntimeDefenseData.counterAttackChanceExpCost); // Counter Attack Chance
-                levelUpMenuEntryControllers[8].UpdateStatsLevelValueText(playersDefenseDataController.RuntimeDefenseData.CounterAttackChance); // Counter Attack Chance
+                bool wasAbleToUnlock = LevelUpManager.Instance.AttemptToLevelUpStat(ref playersExperiencePoints, playersDefenseStatContainer.runtimeDefenseStats.counterAttackChance);
+                if (!wasAbleToUnlock) { return; }
+
+                levelUpMenuEntryControllers[8].UpdateMenuEntry(playersDefenseStatContainer.runtimeDefenseStats.counterAttackChance); // Counter Attack Chance
                 UpdateExperiencePointTrackerText();
             }
 
             public void LevelUpBlockChance()
             {
-                playersDefenseDataController.LevelUpBlockChance(ref playersExperiencePoints);
-                levelUpMenuEntryControllers[9].UpdatePurchaseButtonText(playersDefenseDataController.RuntimeDefenseData.blockChanceExpCost); // Block Chance
-                levelUpMenuEntryControllers[9].UpdateStatsLevelValueText(playersDefenseDataController.RuntimeDefenseData.BlockChance); // Block Chance
+                bool wasAbleToUnlock = LevelUpManager.Instance.AttemptToLevelUpStat(ref playersExperiencePoints, playersDefenseStatContainer.runtimeDefenseStats.blockChance);
+                if (!wasAbleToUnlock) { return; }
+
+                levelUpMenuEntryControllers[9].UpdateMenuEntry(playersDefenseStatContainer.runtimeDefenseStats.blockChance); // Block Chance
                 UpdateExperiencePointTrackerText();
             }
 
             public void LevelUpBlockCooldown()
             {
-                playersDefenseDataController.LevelUpBlockCooldown(ref playersExperiencePoints);
-                levelUpMenuEntryControllers[10].UpdatePurchaseButtonText(playersDefenseDataController.RuntimeDefenseData.blockCooldownExpCost); // Block Cooldown
-                levelUpMenuEntryControllers[10].UpdateStatsLevelValueText(playersDefenseDataController.RuntimeDefenseData.BlockCooldown); // Block Cooldown
+                bool wasAbleToUnlock = LevelUpManager.Instance.AttemptToLevelUpStat(ref playersExperiencePoints, playersDefenseStatContainer.runtimeDefenseStats.blockCooldown);
+                if (!wasAbleToUnlock) { return; }
+
+                levelUpMenuEntryControllers[10].UpdateMenuEntry(playersDefenseStatContainer.runtimeDefenseStats.blockCooldown); // Block Cooldown
+                playersDefenseStatContainer.runtimeDefenseStats.currentBlockCooldown += playersDefenseStatContainer.runtimeDefenseStats.blockCooldown.AdditiveStatValuePerLevel;
                 UpdateExperiencePointTrackerText();
+
+                if (playersDefenseStatContainer.runtimeDefenseStats.blockCooldown.StatValue <= 0f)
+                {
+                    levelUpMenuEntryControllers[10].DisablePurchaseButton();
+                }
             }
 
             public void LevelUpBlockAmount()
             {
-                playersDefenseDataController.LevelUpBlockAmount(ref playersExperiencePoints);
-                levelUpMenuEntryControllers[11].UpdatePurchaseButtonText(playersDefenseDataController.RuntimeDefenseData.blockAmountExpCost); // Block Amount
-                levelUpMenuEntryControllers[11].UpdateStatsLevelValueText(playersDefenseDataController.RuntimeDefenseData.BlockAmount); // Block Amount
+                bool wasAbleToUnlock = LevelUpManager.Instance.AttemptToLevelUpStat(ref playersExperiencePoints, playersDefenseStatContainer.runtimeDefenseStats.blockAmount);
+                if (!wasAbleToUnlock) { return; }
+
+                levelUpMenuEntryControllers[11].UpdateMenuEntry(playersDefenseStatContainer.runtimeDefenseStats.blockAmount); // Block Amount
                 UpdateExperiencePointTrackerText();
             }
 
             public void LevelUpReflectAttackChance()
             {
-                playersDefenseDataController.LevelUpReflectAttackChance(ref playersExperiencePoints);
-                levelUpMenuEntryControllers[12].UpdatePurchaseButtonText(playersDefenseDataController.RuntimeDefenseData.reflectAttackChanceExpCost); // Reflect Attack Chance
-                levelUpMenuEntryControllers[12].UpdateStatsLevelValueText(playersDefenseDataController.RuntimeDefenseData.ReflectAttackChance); // Reflect Attack Chance
+                bool wasAbleToUnlock = LevelUpManager.Instance.AttemptToLevelUpStat(ref playersExperiencePoints, playersDefenseStatContainer.runtimeDefenseStats.reflectAttackChance);
+                if (!wasAbleToUnlock) { return; }
+
+                levelUpMenuEntryControllers[12].UpdateMenuEntry(playersDefenseStatContainer.runtimeDefenseStats.reflectAttackChance); // Reflect Attack Chance
                 UpdateExperiencePointTrackerText();
             }
 
             public void LevelUpReflectAttackAngle()
             {
-                playersDefenseDataController.LevelUpReflectAttackAngle(ref playersExperiencePoints);
-                levelUpMenuEntryControllers[13].UpdatePurchaseButtonText(playersDefenseDataController.RuntimeDefenseData.reflectAttackChanceExpCost); // Reflect Attack Angle
-                levelUpMenuEntryControllers[13].UpdateStatsLevelValueText(playersDefenseDataController.RuntimeDefenseData.ReflectAttackChance); // Reflect Attack Angle
+                bool wasAbleToUnlock = LevelUpManager.Instance.AttemptToLevelUpStat(ref playersExperiencePoints, playersDefenseStatContainer.runtimeDefenseStats.reflectAttackAngle);
+                if (!wasAbleToUnlock) { return; }
+
+                levelUpMenuEntryControllers[13].UpdateMenuEntry(playersDefenseStatContainer.runtimeDefenseStats.reflectAttackChance); // Reflect Attack Angle
                 UpdateExperiencePointTrackerText();
+
+                if (playersDefenseStatContainer.runtimeDefenseStats.reflectAttackAngle.StatValue <= 0f)
+                {
+                    levelUpMenuEntryControllers[13].DisablePurchaseButton();
+                }
             }
 
             public void LevelUpDodgeChance()
             {
-                playersDefenseDataController.LevelUpDodgeChance(ref playersExperiencePoints);
-                levelUpMenuEntryControllers[14].UpdatePurchaseButtonText(playersDefenseDataController.RuntimeDefenseData.dodgeChanceExpCost); // Dodge Chance
-                levelUpMenuEntryControllers[14].UpdateStatsLevelValueText(playersDefenseDataController.RuntimeDefenseData.DodgeChance); // Dodge Chance
+                bool wasAbleToUnlock = LevelUpManager.Instance.AttemptToLevelUpStat(ref playersExperiencePoints, playersDefenseStatContainer.runtimeDefenseStats.dodgeChance);
+                if (!wasAbleToUnlock) { return; }
+
+                levelUpMenuEntryControllers[14].UpdateMenuEntry(playersDefenseStatContainer.runtimeDefenseStats.dodgeChance); // Dodge Chance
                 UpdateExperiencePointTrackerText();
             }
 
             public void LevelUpDodgeCooldown()
             {
-                playersDefenseDataController.LevelUpDodgeCooldown(ref playersExperiencePoints);
-                levelUpMenuEntryControllers[15].UpdatePurchaseButtonText(playersDefenseDataController.RuntimeDefenseData.dodgeCooldownExpCost); // Dodge Cooldown
-                levelUpMenuEntryControllers[15].UpdateStatsLevelValueText(playersDefenseDataController.RuntimeDefenseData.DodgeCooldown); // Dodge Cooldown
+                bool wasAbleToUnlock = LevelUpManager.Instance.AttemptToLevelUpStat(ref playersExperiencePoints, playersDefenseStatContainer.runtimeDefenseStats.dodgeCooldown);
+                if (!wasAbleToUnlock) { return; }
+
+                levelUpMenuEntryControllers[15].UpdateMenuEntry(playersDefenseStatContainer.runtimeDefenseStats.dodgeCooldown); // Dodge Cooldown
+                playersDefenseStatContainer.runtimeDefenseStats.currentDodgeCooldown += playersDefenseStatContainer.runtimeDefenseStats.dodgeCooldown.AdditiveStatValuePerLevel;
                 UpdateExperiencePointTrackerText();
+
+                if (playersDefenseStatContainer.runtimeDefenseStats.dodgeCooldown.StatValue <= 0f)
+                {
+                    levelUpMenuEntryControllers[15].DisablePurchaseButton();
+                }
             }
 
             public void LevelUpArmorValue()
             {
-                playersDefenseDataController.LevelUpArmorValue(ref playersExperiencePoints);
-                levelUpMenuEntryControllers[16].UpdatePurchaseButtonText(playersDefenseDataController.RuntimeDefenseData.armorValueExpCost); // Armor Value
-                levelUpMenuEntryControllers[16].UpdateStatsLevelValueText(playersDefenseDataController.RuntimeDefenseData.ArmorValue); // Armor Value
+                bool wasAbleToUnlock = LevelUpManager.Instance.AttemptToLevelUpStat(ref playersExperiencePoints, playersDefenseStatContainer.runtimeDefenseStats.armorValue);
+                if (!wasAbleToUnlock) { return; }
+
+                levelUpMenuEntryControllers[16].UpdateMenuEntry(playersDefenseStatContainer.runtimeDefenseStats.armorValue); // Armor Value
                 UpdateExperiencePointTrackerText();
             }
 
             public void LevelUpThornsAmount()
             {
-                playersDefenseDataController.LevelUpThornsAmount(ref playersExperiencePoints);
-                levelUpMenuEntryControllers[17].UpdatePurchaseButtonText(playersDefenseDataController.RuntimeDefenseData.thornsAmountExpCost); // Thorns Amount
-                levelUpMenuEntryControllers[17].UpdateStatsLevelValueText(playersDefenseDataController.RuntimeDefenseData.ThornsAmount); // Thorns Amount
+                bool wasAbleToUnlock = LevelUpManager.Instance.AttemptToLevelUpStat(ref playersExperiencePoints, playersDefenseStatContainer.runtimeDefenseStats.thornsAmount);
+                if (!wasAbleToUnlock) { return; }
+
+                levelUpMenuEntryControllers[17].UpdateMenuEntry(playersDefenseStatContainer.runtimeDefenseStats.thornsAmount); // Thorns Amount
                 UpdateExperiencePointTrackerText();
             }
 
             public void LevelUpCriticalHitChanceResist()
             {
-                playersDefenseDataController.LevelUpCriticalHitChanceResist(ref playersExperiencePoints);
-                levelUpMenuEntryControllers[18].UpdatePurchaseButtonText(playersDefenseDataController.RuntimeDefenseData.criticalHitChanceResistExpCost); // Critical Hit Chance Resist
-                levelUpMenuEntryControllers[18].UpdateStatsLevelValueText(playersDefenseDataController.RuntimeDefenseData.CriticalHitChanceResist); // Critical Hit Chance Resist
+                bool wasAbleToUnlock = LevelUpManager.Instance.AttemptToLevelUpStat(ref playersExperiencePoints, playersDefenseStatContainer.runtimeDefenseStats.criticalHitChanceResist);
+                if (!wasAbleToUnlock) { return; }
+
+                levelUpMenuEntryControllers[18].UpdateMenuEntry(playersDefenseStatContainer.runtimeDefenseStats.criticalHitChanceResist); // Critical Hit Chance Resist
                 UpdateExperiencePointTrackerText();
             }
 
             public void LevelUpCriticalHitDamageResist()
             {
-                playersDefenseDataController.LevelUpCriticalHitDamageResist(ref playersExperiencePoints);
-                levelUpMenuEntryControllers[19].UpdatePurchaseButtonText(playersDefenseDataController.RuntimeDefenseData.criticalHitDamageResistExpCost); // Critical Hit Damage Resist
-                levelUpMenuEntryControllers[19].UpdateStatsLevelValueText(playersDefenseDataController.RuntimeDefenseData.CriticalHitDamageResist); // Critical Hit Damage Resist
+                bool wasAbleToUnlock = LevelUpManager.Instance.AttemptToLevelUpStat(ref playersExperiencePoints, playersDefenseStatContainer.runtimeDefenseStats.criticalHitDamageResist);
+                if (!wasAbleToUnlock) { return; }
+
+                levelUpMenuEntryControllers[19].UpdateMenuEntry(playersDefenseStatContainer.runtimeDefenseStats.criticalHitDamageResist); // Critical Hit Damage Resist
                 UpdateExperiencePointTrackerText();
             }
 
             public void LevelUpStatusEffectResist()
             {
-                playersDefenseDataController.LevelUpStatusEffectResist(ref playersExperiencePoints);
-                levelUpMenuEntryControllers[20].UpdatePurchaseButtonText(playersDefenseDataController.RuntimeDefenseData.statusEffectResistExpCost); // Status Effect Resist
-                levelUpMenuEntryControllers[20].UpdateStatsLevelValueText(playersDefenseDataController.RuntimeDefenseData.StatusEffectResist); // Status Effect Resist
+                bool wasAbleToUnlock = LevelUpManager.Instance.AttemptToLevelUpStat(ref playersExperiencePoints, playersDefenseStatContainer.runtimeDefenseStats.statusEffectResist);
+                if (!wasAbleToUnlock) { return; }
+
+                levelUpMenuEntryControllers[20].UpdateMenuEntry(playersDefenseStatContainer.runtimeDefenseStats.statusEffectResist); // Status Effect Resist
                 UpdateExperiencePointTrackerText();
             }
 
             public void LevelUpPhysicalDamageResist()
             {
-                playersDefenseDataController.LevelUpPhysicalDamageResist(ref playersExperiencePoints);
-                levelUpMenuEntryControllers[21].UpdatePurchaseButtonText(playersDefenseDataController.RuntimeDefenseData.physicalDamageResistExpCost); // Physical Damage Resist
-                levelUpMenuEntryControllers[21].UpdateStatsLevelValueText(playersDefenseDataController.RuntimeDefenseData.PhysicalDamageResist); // Physical Damage Resist
+                bool wasAbleToUnlock = LevelUpManager.Instance.AttemptToLevelUpStat(ref playersExperiencePoints, playersDefenseStatContainer.runtimeDefenseStats.physicalDamageResist);
+                if (!wasAbleToUnlock) { return; }
+
+                levelUpMenuEntryControllers[21].UpdateMenuEntry(playersDefenseStatContainer.runtimeDefenseStats.physicalDamageResist); // Physical Damage Resist
                 UpdateExperiencePointTrackerText();
             }
 
             public void LevelUpMagicalDamageResist()
             {
-                playersDefenseDataController.LevelUpMagicalDamageResist(ref playersExperiencePoints);
-                levelUpMenuEntryControllers[22].UpdatePurchaseButtonText(playersDefenseDataController.RuntimeDefenseData.magicalDamageResistExpCost); // Magical Damage Resist
-                levelUpMenuEntryControllers[22].UpdateStatsLevelValueText(playersDefenseDataController.RuntimeDefenseData.MagicalDamageResist); // Magical Damage Resist
+                bool wasAbleToUnlock = LevelUpManager.Instance.AttemptToLevelUpStat(ref playersExperiencePoints, playersDefenseStatContainer.runtimeDefenseStats.magicalDamageResist);
+                if (!wasAbleToUnlock) { return; }
+
+                levelUpMenuEntryControllers[22].UpdateMenuEntry(playersDefenseStatContainer.runtimeDefenseStats.magicalDamageResist); // Magical Damage Resist
                 UpdateExperiencePointTrackerText();
             }
 
             public void LevelUpEnergyDamageResist()
             {
-                playersDefenseDataController.LevelUpEnergyDamageResist(ref playersExperiencePoints);
-                levelUpMenuEntryControllers[23].UpdatePurchaseButtonText(playersDefenseDataController.RuntimeDefenseData.energyDamageResistExpCost); // Energy Damage Resist
-                levelUpMenuEntryControllers[23].UpdateStatsLevelValueText(playersDefenseDataController.RuntimeDefenseData.EnergyDamageResist); // Energy Damage Resist
+                bool wasAbleToUnlock = LevelUpManager.Instance.AttemptToLevelUpStat(ref playersExperiencePoints, playersDefenseStatContainer.runtimeDefenseStats.energyDamageResist);
+                if (!wasAbleToUnlock) { return; }
+
+                levelUpMenuEntryControllers[23].UpdateMenuEntry(playersDefenseStatContainer.runtimeDefenseStats.energyDamageResist); // Energy Damage Resist
                 UpdateExperiencePointTrackerText();
             }
 
             // MOVEMENT RELATED UNLOCK AND LEVEL UP FUNCTIONS
             public void UnlockGroundSpeed()
             {
-                playersMovementDataController.UnlockGroundSpeed(ref playersExperiencePoints);
-                levelUpMenuEntryControllers[24].UnlockPurchaseButton(); // Ground Speed
-                levelUpMenuEntryControllers[25].UnlockPurchaseButton(); // Ground Turning Speed
+                bool wasAbleToUnlock = LevelUpManager.Instance.AttemptToUnlockStat(ref playersExperiencePoints, playersMovementStatContainer.runtimeMovementStats.groundSpeed);
+                if (!wasAbleToUnlock) { return; }
+
+                levelUpMenuEntryControllers[24].UnlockPurchaseButton(playersMovementStatContainer.runtimeMovementStats.groundSpeed); // Ground Speed
+                levelUpMenuEntryControllers[25].UnlockPurchaseButton(playersMovementStatContainer.runtimeMovementStats.groundTurningSpeed); // Ground Turning Speed
                 levelUpMenuEntryControllers[25].gameObject.SetActive(true); // Ground Turning Speed
-                levelUpMenuEntryControllers[26].UnlockPurchaseButton(); // Ground Acceleration Speed
+                levelUpMenuEntryControllers[26].UnlockPurchaseButton(playersMovementStatContainer.runtimeMovementStats.groundAccelerationSpeed); // Ground Acceleration Speed
                 levelUpMenuEntryControllers[26].gameObject.SetActive(true); // Ground Acceleration Speed
-                levelUpMenuEntryControllers[27].UnlockPurchaseButton(); // Ground Braking Speed
+                levelUpMenuEntryControllers[27].UnlockPurchaseButton(playersMovementStatContainer.runtimeMovementStats.groundBrakingSpeed); // Ground Braking Speed
                 levelUpMenuEntryControllers[27].gameObject.SetActive(true); // Ground Braking Speed
-                levelUpMenuEntryControllers[24].UpdateStatsLevelValueText(playersMovementDataController.RuntimeMovementData.GroundSpeed); // Ground Speed
-                levelUpMenuEntryControllers[25].UpdateStatsLevelValueText(playersMovementDataController.RuntimeMovementData.GroundTurningSpeed); // Ground Turning Speed
-                levelUpMenuEntryControllers[26].UpdateStatsLevelValueText(playersMovementDataController.RuntimeMovementData.GroundAccelerationSpeed); // Ground Acceleration Speed
-                levelUpMenuEntryControllers[27].UpdateStatsLevelValueText(playersMovementDataController.RuntimeMovementData.GroundBrakingSpeed); // Ground Braking Speed
                 UpdateExperiencePointTrackerText();
-                playersMovementDataController.UpdateMovementStats();
+                playersMovementStatContainer.UpdateMovementStats();
             }
 
             public void UnlockSurfaceWaterSpeed()
             {
-                playersMovementDataController.UnlockSurfaceWaterSpeed(ref playersExperiencePoints);
-                levelUpMenuEntryControllers[28].UnlockPurchaseButton(); // Surface Water Speed
-                levelUpMenuEntryControllers[29].UnlockPurchaseButton(); // Surface Water Turning Speed
+                bool wasAbleToUnlock = LevelUpManager.Instance.AttemptToUnlockStat(ref playersExperiencePoints, playersMovementStatContainer.runtimeMovementStats.surfaceWaterSpeed);
+                if (!wasAbleToUnlock) { return; }
+
+                levelUpMenuEntryControllers[28].UnlockPurchaseButton(playersMovementStatContainer.runtimeMovementStats.surfaceWaterSpeed); // Surface Water Speed
+                levelUpMenuEntryControllers[29].UnlockPurchaseButton(playersMovementStatContainer.runtimeMovementStats.surfaceWaterTurningSpeed); // Surface Water Turning Speed
                 levelUpMenuEntryControllers[29].gameObject.SetActive(true); // Surface Water Turning Speed
-                levelUpMenuEntryControllers[30].UnlockPurchaseButton(); // Surface Water Acceleration Speed
+                levelUpMenuEntryControllers[30].UnlockPurchaseButton(playersMovementStatContainer.runtimeMovementStats.surfaceWaterAccelerationSpeed); // Surface Water Acceleration Speed
                 levelUpMenuEntryControllers[30].gameObject.SetActive(true); // Surface Water Acceleration Speed
-                levelUpMenuEntryControllers[31].UnlockPurchaseButton(); // Surface Water Braking Speed
+                levelUpMenuEntryControllers[31].UnlockPurchaseButton(playersMovementStatContainer.runtimeMovementStats.surfaceWaterBrakingSpeed); // Surface Water Braking Speed
                 levelUpMenuEntryControllers[31].gameObject.SetActive(true); // Surface Water Braking Speed
-                levelUpMenuEntryControllers[28].UpdateStatsLevelValueText(playersMovementDataController.RuntimeMovementData.SurfaceWaterSpeed); // Surface Water Speed
-                levelUpMenuEntryControllers[29].UpdateStatsLevelValueText(playersMovementDataController.RuntimeMovementData.SurfaceWaterTurningSpeed); // Surface Water Turning Speed
-                levelUpMenuEntryControllers[30].UpdateStatsLevelValueText(playersMovementDataController.RuntimeMovementData.SurfaceWaterAccelerationSpeed); // Surface Water Acceleration Speed
-                levelUpMenuEntryControllers[31].UpdateStatsLevelValueText(playersMovementDataController.RuntimeMovementData.SurfaceWaterBrakingSpeed); // Surface Water Braking Speed
                 UpdateExperiencePointTrackerText();
-                playersMovementDataController.UpdateMovementStats();
+                playersMovementStatContainer.UpdateMovementStats();
             }
 
             public void UnlockUnderwaterSpeed()
             {
-                playersMovementDataController.UnlockUnderwaterSpeed(ref playersExperiencePoints);
-                levelUpMenuEntryControllers[32].UnlockPurchaseButton(); // Underwater Speed
-                levelUpMenuEntryControllers[33].UnlockPurchaseButton(); // Underwater Turning Speed
+                bool wasAbleToUnlock = LevelUpManager.Instance.AttemptToUnlockStat(ref playersExperiencePoints, playersMovementStatContainer.runtimeMovementStats.underwaterSpeed);
+                if (!wasAbleToUnlock) { return; }
+
+                levelUpMenuEntryControllers[32].UnlockPurchaseButton(playersMovementStatContainer.runtimeMovementStats.underwaterSpeed); // Underwater Speed
+                levelUpMenuEntryControllers[33].UnlockPurchaseButton(playersMovementStatContainer.runtimeMovementStats.underwaterTurningSpeed); // Underwater Turning Speed
                 levelUpMenuEntryControllers[33].gameObject.SetActive(true); // Underwater Turning Speed
-                levelUpMenuEntryControllers[34].UnlockPurchaseButton(); // Underwater Acceleration Speed
+                levelUpMenuEntryControllers[34].UnlockPurchaseButton(playersMovementStatContainer.runtimeMovementStats.underwaterAccelerationSpeed); // Underwater Acceleration Speed
                 levelUpMenuEntryControllers[34].gameObject.SetActive(true); // Underwater Acceleration Speed
-                levelUpMenuEntryControllers[35].UnlockPurchaseButton(); // Underwater Braking Speed
+                levelUpMenuEntryControllers[35].UnlockPurchaseButton(playersMovementStatContainer.runtimeMovementStats.underwaterBrakingSpeed); // Underwater Braking Speed
                 levelUpMenuEntryControllers[35].gameObject.SetActive(true); // Underwater Braking Speed
-                levelUpMenuEntryControllers[32].UpdateStatsLevelValueText(playersMovementDataController.RuntimeMovementData.UnderwaterSpeed); // Underwater Speed
-                levelUpMenuEntryControllers[33].UpdateStatsLevelValueText(playersMovementDataController.RuntimeMovementData.UnderwaterTurningSpeed); // Underwater Turning Speed
-                levelUpMenuEntryControllers[34].UpdateStatsLevelValueText(playersMovementDataController.RuntimeMovementData.UnderwaterAccelerationSpeed); // Underwater Acceleration Speed
-                levelUpMenuEntryControllers[35].UpdateStatsLevelValueText(playersMovementDataController.RuntimeMovementData.UnderwaterBrakingSpeed); // Underwater Braking Speed
                 UpdateExperiencePointTrackerText();
-                playersMovementDataController.UpdateMovementStats();
+                playersMovementStatContainer.UpdateMovementStats();
             }
 
             public void UnlockFlyingSpeed()
             {
-                playersMovementDataController.UnlockFlyingSpeed(ref playersExperiencePoints);
-                levelUpMenuEntryControllers[36].UnlockPurchaseButton(); // Flying Speed
-                levelUpMenuEntryControllers[37].UnlockPurchaseButton(); // Flying Turning Speed
+                bool wasAbleToUnlock = LevelUpManager.Instance.AttemptToUnlockStat(ref playersExperiencePoints, playersMovementStatContainer.runtimeMovementStats.flyingSpeed);
+                if (!wasAbleToUnlock) { return; }
+
+                levelUpMenuEntryControllers[36].UnlockPurchaseButton(playersMovementStatContainer.runtimeMovementStats.flyingSpeed); // Flying Speed
+                levelUpMenuEntryControllers[37].UnlockPurchaseButton(playersMovementStatContainer.runtimeMovementStats.flyingTurningSpeed); // Flying Turning Speed
                 levelUpMenuEntryControllers[37].gameObject.SetActive(true); // Flying Turning Speed
-                levelUpMenuEntryControllers[38].UnlockPurchaseButton(); // Flying Acceleration Speed
+                levelUpMenuEntryControllers[38].UnlockPurchaseButton(playersMovementStatContainer.runtimeMovementStats.flyingAccelerationSpeed); // Flying Acceleration Speed
                 levelUpMenuEntryControllers[38].gameObject.SetActive(true); // Flying Acceleration Speed
-                levelUpMenuEntryControllers[39].UnlockPurchaseButton(); // Flying Braking Speed
+                levelUpMenuEntryControllers[39].UnlockPurchaseButton(playersMovementStatContainer.runtimeMovementStats.flyingBrakingSpeed); // Flying Braking Speed
                 levelUpMenuEntryControllers[39].gameObject.SetActive(true); // Flying Braking Speed
-                levelUpMenuEntryControllers[36].UpdateStatsLevelValueText(playersMovementDataController.RuntimeMovementData.FlyingSpeed); // Flying Speed
-                levelUpMenuEntryControllers[37].UpdateStatsLevelValueText(playersMovementDataController.RuntimeMovementData.FlyingTurningSpeed); // Flying Turning Speed
-                levelUpMenuEntryControllers[38].UpdateStatsLevelValueText(playersMovementDataController.RuntimeMovementData.FlyingAccelerationSpeed); // Flying Acceleration Speed
-                levelUpMenuEntryControllers[39].UpdateStatsLevelValueText(playersMovementDataController.RuntimeMovementData.FlyingBrakingSpeed); // Flying Braking Speed
                 UpdateExperiencePointTrackerText();
-                playersMovementDataController.UpdateMovementStats();
+                playersMovementStatContainer.UpdateMovementStats();
             }
 
             public void UnlockSpaceTravelSpeed()
             {
-                playersMovementDataController.UnlockSpaceTravelSpeed(ref playersExperiencePoints);
-                levelUpMenuEntryControllers[40].UnlockPurchaseButton(); // Space Travel Speed
-                levelUpMenuEntryControllers[41].UnlockPurchaseButton(); // Space Travel Turning Speed
+                bool wasAbleToUnlock = LevelUpManager.Instance.AttemptToUnlockStat(ref playersExperiencePoints, playersMovementStatContainer.runtimeMovementStats.spaceTravelSpeed);
+                if (!wasAbleToUnlock) { return; }
+
+                levelUpMenuEntryControllers[40].UnlockPurchaseButton(playersMovementStatContainer.runtimeMovementStats.spaceTravelSpeed); // Space Travel Speed
+                levelUpMenuEntryControllers[41].UnlockPurchaseButton(playersMovementStatContainer.runtimeMovementStats.spaceTravelTurningSpeed); // Space Travel Turning Speed
                 levelUpMenuEntryControllers[41].gameObject.SetActive(true); // Space Travel Turning Speed
-                levelUpMenuEntryControllers[42].UnlockPurchaseButton(); // Space Travel Acceleration Speed
+                levelUpMenuEntryControllers[42].UnlockPurchaseButton(playersMovementStatContainer.runtimeMovementStats.spaceTravelAccelerationSpeed); // Space Travel Acceleration Speed
                 levelUpMenuEntryControllers[42].gameObject.SetActive(true); // Space Travel Acceleration Speed
-                levelUpMenuEntryControllers[43].UnlockPurchaseButton(); // Space Travel Braking Speed
+                levelUpMenuEntryControllers[43].UnlockPurchaseButton(playersMovementStatContainer.runtimeMovementStats.spaceTravelBrakingSpeed); // Space Travel Braking Speed
                 levelUpMenuEntryControllers[43].gameObject.SetActive(true); // Space Travel Braking Speed
-                levelUpMenuEntryControllers[40].UpdateStatsLevelValueText(playersMovementDataController.RuntimeMovementData.SpaceTravelSpeed); // Space Travel Speed
-                levelUpMenuEntryControllers[41].UpdateStatsLevelValueText(playersMovementDataController.RuntimeMovementData.SpaceTravelTurningSpeed); // Space Travel Turning Speed
-                levelUpMenuEntryControllers[42].UpdateStatsLevelValueText(playersMovementDataController.RuntimeMovementData.SpaceTravelAccelerationSpeed); // Space Travel Acceleration Speed
-                levelUpMenuEntryControllers[43].UpdateStatsLevelValueText(playersMovementDataController.RuntimeMovementData.SpaceTravelBrakingSpeed); // Space Travel Braking Speed
                 UpdateExperiencePointTrackerText();
-                playersMovementDataController.UpdateMovementStats();
+                playersMovementStatContainer.UpdateMovementStats();
             }
 
             public void LevelUpGroundSpeed()
             {
-                playersMovementDataController.LevelUpGroundSpeed(ref playersExperiencePoints);
-                levelUpMenuEntryControllers[24].UpdatePurchaseButtonText(playersMovementDataController.RuntimeMovementData.groundSpeedExpCost); // Ground Speed
-                levelUpMenuEntryControllers[24].UpdateStatsLevelValueText(playersMovementDataController.RuntimeMovementData.GroundSpeed); // Ground Speed
+                bool wasAbleToUnlock = LevelUpManager.Instance.AttemptToLevelUpStat(ref playersExperiencePoints, playersMovementStatContainer.runtimeMovementStats.groundSpeed);
+                if (!wasAbleToUnlock) { return; }
+
+                levelUpMenuEntryControllers[24].UpdateMenuEntry(playersMovementStatContainer.runtimeMovementStats.groundSpeed); // Ground Speed
                 UpdateExperiencePointTrackerText();
-                playersMovementDataController.UpdateMovementStats();
+                playersMovementStatContainer.UpdateMovementStats();
             }
 
             public void LevelUpGroundTurningSpeed()
             {
-                playersMovementDataController.LevelUpGroundTurningSpeed(ref playersExperiencePoints);
-                levelUpMenuEntryControllers[25].UpdatePurchaseButtonText(playersMovementDataController.RuntimeMovementData.groundTurningSpeedExpCost); // Ground Turning Speed
-                levelUpMenuEntryControllers[25].UpdateStatsLevelValueText(playersMovementDataController.RuntimeMovementData.GroundTurningSpeed); // Ground Turning Speed
+                bool wasAbleToUnlock = LevelUpManager.Instance.AttemptToLevelUpStat(ref playersExperiencePoints, playersMovementStatContainer.runtimeMovementStats.groundTurningSpeed);
+                if (!wasAbleToUnlock) { return; }
+
+                levelUpMenuEntryControllers[25].UpdateMenuEntry(playersMovementStatContainer.runtimeMovementStats.groundTurningSpeed); // Ground Turning Speed
                 UpdateExperiencePointTrackerText();
-                playersMovementDataController.UpdateMovementStats();
+                playersMovementStatContainer.UpdateMovementStats();
             }
 
             public void LevelUpGroundAccelerationSpeed()
             {
-                playersMovementDataController.LevelUpGroundAccelerationSpeed(ref playersExperiencePoints);
-                levelUpMenuEntryControllers[26].UpdatePurchaseButtonText(playersMovementDataController.RuntimeMovementData.groundAccelerationSpeedExpCost); // Ground Acceleration Speed
-                levelUpMenuEntryControllers[26].UpdateStatsLevelValueText(playersMovementDataController.RuntimeMovementData.GroundAccelerationSpeed); // Ground Acceleration Speed
+                bool wasAbleToUnlock = LevelUpManager.Instance.AttemptToLevelUpStat(ref playersExperiencePoints, playersMovementStatContainer.runtimeMovementStats.groundAccelerationSpeed);
+                if (!wasAbleToUnlock) { return; }
+
+                levelUpMenuEntryControllers[26].UpdateMenuEntry(playersMovementStatContainer.runtimeMovementStats.groundAccelerationSpeed); // Ground Acceleration Speed
                 UpdateExperiencePointTrackerText();
-                playersMovementDataController.UpdateMovementStats();
+                playersMovementStatContainer.UpdateMovementStats();
             }
 
             public void LevelUpGroundBrakingSpeed()
             {
-                playersMovementDataController.LevelUpGroundBrakingSpeed(ref playersExperiencePoints);
-                levelUpMenuEntryControllers[27].UpdatePurchaseButtonText(playersMovementDataController.RuntimeMovementData.groundBrakingSpeedExpCost); // Ground Braking Speed
-                levelUpMenuEntryControllers[27].UpdateStatsLevelValueText(playersMovementDataController.RuntimeMovementData.GroundBrakingSpeed); // Ground Braking Speed
+                bool wasAbleToUnlock = LevelUpManager.Instance.AttemptToLevelUpStat(ref playersExperiencePoints, playersMovementStatContainer.runtimeMovementStats.groundBrakingSpeed);
+                if (!wasAbleToUnlock) { return; }
+
+                levelUpMenuEntryControllers[27].UpdateMenuEntry(playersMovementStatContainer.runtimeMovementStats.groundBrakingSpeed); // Ground Braking Speed
                 UpdateExperiencePointTrackerText();
-                playersMovementDataController.UpdateMovementStats();
+                playersMovementStatContainer.UpdateMovementStats();
             }
 
             public void LevelUpSurfaceWaterSpeed()
             {
-                playersMovementDataController.LevelUpSurfaceWaterSpeed(ref playersExperiencePoints);
-                levelUpMenuEntryControllers[28].UpdatePurchaseButtonText(playersMovementDataController.RuntimeMovementData.surfaceWaterSpeedExpCost); // Surface Water Speed
-                levelUpMenuEntryControllers[28].UpdateStatsLevelValueText(playersMovementDataController.RuntimeMovementData.SurfaceWaterSpeed); // Surface Water Speed
+                bool wasAbleToUnlock = LevelUpManager.Instance.AttemptToLevelUpStat(ref playersExperiencePoints, playersMovementStatContainer.runtimeMovementStats.surfaceWaterSpeed);
+                if (!wasAbleToUnlock) { return; }
+
+                levelUpMenuEntryControllers[28].UpdateMenuEntry(playersMovementStatContainer.runtimeMovementStats.surfaceWaterSpeed); // Surface Water Speed
                 UpdateExperiencePointTrackerText();
-                playersMovementDataController.UpdateMovementStats();
+                playersMovementStatContainer.UpdateMovementStats();
             }
 
             public void LevelUpSurfaceWaterTurningSpeed()
             {
-                playersMovementDataController.LevelUpSurfaceWaterTurningSpeed(ref playersExperiencePoints);
-                levelUpMenuEntryControllers[29].UpdatePurchaseButtonText(playersMovementDataController.RuntimeMovementData.surfaceWaterTurningSpeedExpCost); // Surface Water Turning Speed
-                levelUpMenuEntryControllers[29].UpdateStatsLevelValueText(playersMovementDataController.RuntimeMovementData.SurfaceWaterTurningSpeed); // Surface Water Turning Speed
+                bool wasAbleToUnlock = LevelUpManager.Instance.AttemptToLevelUpStat(ref playersExperiencePoints, playersMovementStatContainer.runtimeMovementStats.surfaceWaterTurningSpeed);
+                if (!wasAbleToUnlock) { return; }
+
+                levelUpMenuEntryControllers[29].UpdateMenuEntry(playersMovementStatContainer.runtimeMovementStats.surfaceWaterTurningSpeed); // Surface Water Turning Speed
                 UpdateExperiencePointTrackerText();
-                playersMovementDataController.UpdateMovementStats();
+                playersMovementStatContainer.UpdateMovementStats();
             }
 
             public void LevelUpSurfaceWaterAccelerationSpeed()
             {
-                playersMovementDataController.LevelUpSurfaceWaterAccelerationSpeed(ref playersExperiencePoints);
-                levelUpMenuEntryControllers[30].UpdatePurchaseButtonText(playersMovementDataController.RuntimeMovementData.surfaceWaterAccelerationSpeedExpCost); // Surface Water Acceleration Speed
-                levelUpMenuEntryControllers[30].UpdateStatsLevelValueText(playersMovementDataController.RuntimeMovementData.SurfaceWaterAccelerationSpeed); // Surface Water Acceleration Speed
+                bool wasAbleToUnlock = LevelUpManager.Instance.AttemptToLevelUpStat(ref playersExperiencePoints, playersMovementStatContainer.runtimeMovementStats.surfaceWaterAccelerationSpeed);
+                if (!wasAbleToUnlock) { return; }
+
+                levelUpMenuEntryControllers[30].UpdateMenuEntry(playersMovementStatContainer.runtimeMovementStats.surfaceWaterAccelerationSpeed); // Surface Water Acceleration Speed
                 UpdateExperiencePointTrackerText();
-                playersMovementDataController.UpdateMovementStats();
+                playersMovementStatContainer.UpdateMovementStats();
             }
 
             public void LevelUpSurfaceWaterBrakingSpeed()
             {
-                playersMovementDataController.LevelUpSurfaceWaterBrakingSpeed(ref playersExperiencePoints);
-                levelUpMenuEntryControllers[31].UpdatePurchaseButtonText(playersMovementDataController.RuntimeMovementData.surfaceWaterBrakingSpeedExpCost); // Surface Water Braking Speed
-                levelUpMenuEntryControllers[31].UpdateStatsLevelValueText(playersMovementDataController.RuntimeMovementData.SurfaceWaterBrakingSpeed); // Surface Water Braking Speed
+                bool wasAbleToUnlock = LevelUpManager.Instance.AttemptToLevelUpStat(ref playersExperiencePoints, playersMovementStatContainer.runtimeMovementStats.surfaceWaterBrakingSpeed);
+                if (!wasAbleToUnlock) { return; }
+
+                levelUpMenuEntryControllers[31].UpdateMenuEntry(playersMovementStatContainer.runtimeMovementStats.surfaceWaterBrakingSpeed); // Surface Water Braking Speed
                 UpdateExperiencePointTrackerText();
-                playersMovementDataController.UpdateMovementStats();
+                playersMovementStatContainer.UpdateMovementStats();
             }
 
             public void LevelUpUnderwaterSpeed()
             {
-                playersMovementDataController.LevelUpUnderwaterSpeed(ref playersExperiencePoints);
-                levelUpMenuEntryControllers[32].UpdatePurchaseButtonText(playersMovementDataController.RuntimeMovementData.underwaterSpeedExpCost); // Underwater Speed
-                levelUpMenuEntryControllers[32].UpdateStatsLevelValueText(playersMovementDataController.RuntimeMovementData.UnderwaterSpeed); // Underwater Speed
+                bool wasAbleToUnlock = LevelUpManager.Instance.AttemptToLevelUpStat(ref playersExperiencePoints, playersMovementStatContainer.runtimeMovementStats.underwaterSpeed);
+                if (!wasAbleToUnlock) { return; }
+
+                levelUpMenuEntryControllers[32].UpdateMenuEntry(playersMovementStatContainer.runtimeMovementStats.underwaterSpeed); // Underwater Speed
                 UpdateExperiencePointTrackerText();
-                playersMovementDataController.UpdateMovementStats();
+                playersMovementStatContainer.UpdateMovementStats();
             }
 
             public void LevelUpUnderwaterTurningSpeed()
             {
-                playersMovementDataController.LevelUpUnderwaterTurningSpeed(ref playersExperiencePoints);
-                levelUpMenuEntryControllers[33].UpdatePurchaseButtonText(playersMovementDataController.RuntimeMovementData.underwaterTurningSpeedExpCost); // Underwater Turning Speed
-                levelUpMenuEntryControllers[33].UpdateStatsLevelValueText(playersMovementDataController.RuntimeMovementData.UnderwaterTurningSpeed); // Underwater Turning Speed
+                bool wasAbleToUnlock = LevelUpManager.Instance.AttemptToLevelUpStat(ref playersExperiencePoints, playersMovementStatContainer.runtimeMovementStats.underwaterTurningSpeed);
+                if (!wasAbleToUnlock) { return; }
+
+                levelUpMenuEntryControllers[33].UpdateMenuEntry(playersMovementStatContainer.runtimeMovementStats.underwaterTurningSpeed); // Underwater Turning Speed
                 UpdateExperiencePointTrackerText();
-                playersMovementDataController.UpdateMovementStats();
+                playersMovementStatContainer.UpdateMovementStats();
             }
 
             public void LevelUpUnderwaterAccelerationSpeed()
             {
-                playersMovementDataController.LevelUpUnderwaterAccelerationSpeed(ref playersExperiencePoints);
-                levelUpMenuEntryControllers[34].UpdatePurchaseButtonText(playersMovementDataController.RuntimeMovementData.underwaterAccelerationSpeedExpCost); // Underwater Acceleration Speed
-                levelUpMenuEntryControllers[34].UpdateStatsLevelValueText(playersMovementDataController.RuntimeMovementData.UnderwaterAccelerationSpeed); // Underwater Acceleration Speed
+                bool wasAbleToUnlock = LevelUpManager.Instance.AttemptToLevelUpStat(ref playersExperiencePoints, playersMovementStatContainer.runtimeMovementStats.underwaterAccelerationSpeed);
+                if (!wasAbleToUnlock) { return; }
+
+                levelUpMenuEntryControllers[34].UpdateMenuEntry(playersMovementStatContainer.runtimeMovementStats.underwaterAccelerationSpeed); // Underwater Acceleration Speed
                 UpdateExperiencePointTrackerText();
-                playersMovementDataController.UpdateMovementStats();
+                playersMovementStatContainer.UpdateMovementStats();
             }
 
             public void LevelUpUnderwaterBrakingSpeed()
             {
-                playersMovementDataController.LevelUpUnderwaterBrakingSpeed(ref playersExperiencePoints);
-                levelUpMenuEntryControllers[35].UpdatePurchaseButtonText(playersMovementDataController.RuntimeMovementData.underwaterBrakingSpeedExpCost); // Underwater Braking Speed
-                levelUpMenuEntryControllers[35].UpdateStatsLevelValueText(playersMovementDataController.RuntimeMovementData.UnderwaterBrakingSpeed); // Underwater Braking Speed
+                bool wasAbleToUnlock = LevelUpManager.Instance.AttemptToLevelUpStat(ref playersExperiencePoints, playersMovementStatContainer.runtimeMovementStats.underwaterBrakingSpeed);
+                if (!wasAbleToUnlock) { return; }
+
+                levelUpMenuEntryControllers[35].UpdateMenuEntry(playersMovementStatContainer.runtimeMovementStats.underwaterBrakingSpeed); // Underwater Braking Speed
                 UpdateExperiencePointTrackerText();
-                playersMovementDataController.UpdateMovementStats();
+                playersMovementStatContainer.UpdateMovementStats();
             }
 
             public void LevelUpFlyingSpeed()
             {
-                playersMovementDataController.LevelUpFlyingSpeed(ref playersExperiencePoints);
-                levelUpMenuEntryControllers[36].UpdatePurchaseButtonText(playersMovementDataController.RuntimeMovementData.flyingSpeedExpCost); // Flying Speed
-                levelUpMenuEntryControllers[36].UpdateStatsLevelValueText(playersMovementDataController.RuntimeMovementData.FlyingSpeed); // Flying Speed
+                bool wasAbleToUnlock = LevelUpManager.Instance.AttemptToLevelUpStat(ref playersExperiencePoints, playersMovementStatContainer.runtimeMovementStats.flyingSpeed);
+                if (!wasAbleToUnlock) { return; }
+
+                levelUpMenuEntryControllers[36].UpdateMenuEntry(playersMovementStatContainer.runtimeMovementStats.flyingSpeed); // Flying Speed
                 UpdateExperiencePointTrackerText();
-                playersMovementDataController.UpdateMovementStats();
+                playersMovementStatContainer.UpdateMovementStats();
             }
 
             public void LevelUpFlyingTurningSpeed()
             {
-                playersMovementDataController.LevelUpFlyingTurningSpeed(ref playersExperiencePoints);
-                levelUpMenuEntryControllers[37].UpdatePurchaseButtonText(playersMovementDataController.RuntimeMovementData.flyingTurningSpeedExpCost); // Flying Turning Speed
-                levelUpMenuEntryControllers[37].UpdateStatsLevelValueText(playersMovementDataController.RuntimeMovementData.FlyingTurningSpeed); // Flying Turning Speed
+                bool wasAbleToUnlock = LevelUpManager.Instance.AttemptToLevelUpStat(ref playersExperiencePoints, playersMovementStatContainer.runtimeMovementStats.flyingTurningSpeed);
+                if (!wasAbleToUnlock) { return; }
+
+                levelUpMenuEntryControllers[37].UpdateMenuEntry(playersMovementStatContainer.runtimeMovementStats.flyingTurningSpeed); // Flying Turning Speed
                 UpdateExperiencePointTrackerText();
-                playersMovementDataController.UpdateMovementStats();
+                playersMovementStatContainer.UpdateMovementStats();
             }
 
             public void LevelUpFlyingAccelerationSpeed()
             {
-                playersMovementDataController.LevelUpFlyingAccelerationSpeed(ref playersExperiencePoints);
-                levelUpMenuEntryControllers[38].UpdatePurchaseButtonText(playersMovementDataController.RuntimeMovementData.flyingAccelerationSpeedExpCost); // Flying Acceleration Speed
-                levelUpMenuEntryControllers[38].UpdateStatsLevelValueText(playersMovementDataController.RuntimeMovementData.FlyingAccelerationSpeed); // Flying Acceleration Speed
+                bool wasAbleToUnlock = LevelUpManager.Instance.AttemptToLevelUpStat(ref playersExperiencePoints, playersMovementStatContainer.runtimeMovementStats.flyingAccelerationSpeed);
+                if (!wasAbleToUnlock) { return; }
+
+                levelUpMenuEntryControllers[38].UpdateMenuEntry(playersMovementStatContainer.runtimeMovementStats.flyingAccelerationSpeed); // Flying Acceleration Speed
                 UpdateExperiencePointTrackerText();
-                playersMovementDataController.UpdateMovementStats();
+                playersMovementStatContainer.UpdateMovementStats();
             }
 
             public void LevelUpFlyingBrakingSpeed()
             {
-                playersMovementDataController.LevelUpFlyingBrakingSpeed(ref playersExperiencePoints);
-                levelUpMenuEntryControllers[39].UpdatePurchaseButtonText(playersMovementDataController.RuntimeMovementData.flyingBrakingSpeedExpCost); // Flying Braking Speed
-                levelUpMenuEntryControllers[39].UpdateStatsLevelValueText(playersMovementDataController.RuntimeMovementData.FlyingBrakingSpeed); // Flying Braking Speed
+                bool wasAbleToUnlock = LevelUpManager.Instance.AttemptToLevelUpStat(ref playersExperiencePoints, playersMovementStatContainer.runtimeMovementStats.flyingBrakingSpeed);
+                if (!wasAbleToUnlock) { return; }
+
+                levelUpMenuEntryControllers[39].UpdateMenuEntry(playersMovementStatContainer.runtimeMovementStats.flyingBrakingSpeed); // Flying Braking Speed
                 UpdateExperiencePointTrackerText();
-                playersMovementDataController.UpdateMovementStats();
+                playersMovementStatContainer.UpdateMovementStats();
             }
 
             public void LevelUpSpaceTravelSpeed()
             {
-                playersMovementDataController.LevelUpSpaceTravelSpeed(ref playersExperiencePoints);
-                levelUpMenuEntryControllers[40].UpdatePurchaseButtonText(playersMovementDataController.RuntimeMovementData.spaceTravelSpeedExpCost); // Space Travel Speed
-                levelUpMenuEntryControllers[40].UpdateStatsLevelValueText(playersMovementDataController.RuntimeMovementData.SpaceTravelSpeed); // Space Travel Speed
+                bool wasAbleToUnlock = LevelUpManager.Instance.AttemptToLevelUpStat(ref playersExperiencePoints, playersMovementStatContainer.runtimeMovementStats.spaceTravelSpeed);
+                if (!wasAbleToUnlock) { return; }
+
+                levelUpMenuEntryControllers[40].UpdateMenuEntry(playersMovementStatContainer.runtimeMovementStats.spaceTravelSpeed); // Space Travel Speed
                 UpdateExperiencePointTrackerText();
-                playersMovementDataController.UpdateMovementStats();
+                playersMovementStatContainer.UpdateMovementStats();
             }
 
             public void LevelUpSpaceTravelTurningSpeed()
             {
-                playersMovementDataController.LevelUpSpaceTravelTurningSpeed(ref playersExperiencePoints);
-                levelUpMenuEntryControllers[41].UpdatePurchaseButtonText(playersMovementDataController.RuntimeMovementData.spaceTravelTurningSpeedExpCost); // Space Travel Turning Speed
-                levelUpMenuEntryControllers[41].UpdateStatsLevelValueText(playersMovementDataController.RuntimeMovementData.SpaceTravelTurningSpeed); // Space Travel Turning Speed
+                bool wasAbleToUnlock = LevelUpManager.Instance.AttemptToLevelUpStat(ref playersExperiencePoints, playersMovementStatContainer.runtimeMovementStats.spaceTravelTurningSpeed);
+                if (!wasAbleToUnlock) { return; }
+
+                levelUpMenuEntryControllers[41].UpdateMenuEntry(playersMovementStatContainer.runtimeMovementStats.spaceTravelTurningSpeed); // Space Travel Turning Speed
                 UpdateExperiencePointTrackerText();
-                playersMovementDataController.UpdateMovementStats();
+                playersMovementStatContainer.UpdateMovementStats();
             }
 
             public void LevelUpSpaceTravelAccelerationSpeed()
             {
-                playersMovementDataController.LevelUpSpaceTravelAccelerationSpeed(ref playersExperiencePoints);
-                levelUpMenuEntryControllers[42].UpdatePurchaseButtonText(playersMovementDataController.RuntimeMovementData.spaceTravelAccelerationSpeedExpCost); // Space Travel Acceleration Speed
-                levelUpMenuEntryControllers[42].UpdateStatsLevelValueText(playersMovementDataController.RuntimeMovementData.SpaceTravelAccelerationSpeed); // Space Travel Acceleration Speed
+                bool wasAbleToUnlock = LevelUpManager.Instance.AttemptToLevelUpStat(ref playersExperiencePoints, playersMovementStatContainer.runtimeMovementStats.spaceTravelAccelerationSpeed);
+                if (!wasAbleToUnlock) { return; }
+
+                levelUpMenuEntryControllers[42].UpdateMenuEntry(playersMovementStatContainer.runtimeMovementStats.spaceTravelAccelerationSpeed); // Space Travel Acceleration Speed
                 UpdateExperiencePointTrackerText();
-                playersMovementDataController.UpdateMovementStats();
+                playersMovementStatContainer.UpdateMovementStats();
             }
 
             public void LevelUpSpaceTravelBrakingSpeed()
             {
-                playersMovementDataController.LevelUpSpaceTravelBrakingSpeed(ref playersExperiencePoints);
-                levelUpMenuEntryControllers[43].UpdatePurchaseButtonText(playersMovementDataController.RuntimeMovementData.spaceTravelBrakingSpeedExpCost); // Space Travel Braking Speed
-                levelUpMenuEntryControllers[43].UpdateStatsLevelValueText(playersMovementDataController.RuntimeMovementData.SpaceTravelBrakingSpeed); // Space Travel Braking Speed
+                bool wasAbleToUnlock = LevelUpManager.Instance.AttemptToLevelUpStat(ref playersExperiencePoints, playersMovementStatContainer.runtimeMovementStats.spaceTravelBrakingSpeed);
+                if (!wasAbleToUnlock) { return; }
+
+                levelUpMenuEntryControllers[43].UpdateMenuEntry(playersMovementStatContainer.runtimeMovementStats.spaceTravelBrakingSpeed); // Space Travel Braking Speed
                 UpdateExperiencePointTrackerText();
-                playersMovementDataController.UpdateMovementStats();
+                playersMovementStatContainer.UpdateMovementStats();
             }
         }
     }

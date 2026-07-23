@@ -1,0 +1,143 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5f9b3ce179d78604b89696927229aa8a, type: 3}
+  m_Name: DefaultDefenseStats
+  m_EditorClassIdentifier: Assembly-CSharp::ShapeDefender.DefenseSystem.DefenseStatSO
+  parryChance:
+    defaultStatValue: 0
+    additiveStatValuePerLevel: 1
+    canLevelUp: 0
+    expCostToUnlock: 20
+    expCostToLevel: 10
+    displaySuffix: '%'
+  parryCooldown:
+    defaultStatValue: 30
+    additiveStatValuePerLevel: -0.05
+    canLevelUp: 0
+    expCostToUnlock: 20
+    expCostToLevel: 10
+    displaySuffix: sec(s)
+  currentParryCooldown: 0
+  counterAttackChance:
+    defaultStatValue: 0
+    additiveStatValuePerLevel: 1
+    canLevelUp: 0
+    expCostToUnlock: 20
+    expCostToLevel: 10
+    displaySuffix: '%'
+  blockChance:
+    defaultStatValue: 0
+    additiveStatValuePerLevel: 1
+    canLevelUp: 0
+    expCostToUnlock: 20
+    expCostToLevel: 10
+    displaySuffix: '%'
+  blockCooldown:
+    defaultStatValue: 30
+    additiveStatValuePerLevel: -0.05
+    canLevelUp: 0
+    expCostToUnlock: 20
+    expCostToLevel: 10
+    displaySuffix: sec(s)
+  currentBlockCooldown: 0
+  blockAmount:
+    defaultStatValue: 0
+    additiveStatValuePerLevel: 0.5
+    canLevelUp: 0
+    expCostToUnlock: 20
+    expCostToLevel: 10
+    displaySuffix: 
+  reflectAttackChance:
+    defaultStatValue: 0
+    additiveStatValuePerLevel: 1
+    canLevelUp: 0
+    expCostToUnlock: 20
+    expCostToLevel: 10
+    displaySuffix: '%'
+  reflectAttackAngle:
+    defaultStatValue: 45
+    additiveStatValuePerLevel: -0.05
+    canLevelUp: 0
+    expCostToUnlock: 20
+    expCostToLevel: 10
+    displaySuffix: "\xB0"
+  dodgeChance:
+    defaultStatValue: 0
+    additiveStatValuePerLevel: 1
+    canLevelUp: 0
+    expCostToUnlock: 20
+    expCostToLevel: 10
+    displaySuffix: '%'
+  dodgeCooldown:
+    defaultStatValue: 30
+    additiveStatValuePerLevel: -0.05
+    canLevelUp: 0
+    expCostToUnlock: 20
+    expCostToLevel: 10
+    displaySuffix: sec(s)
+  currentDodgeCooldown: 0
+  armorValue:
+    defaultStatValue: 0
+    additiveStatValuePerLevel: 0.25
+    canLevelUp: 0
+    expCostToUnlock: 20
+    expCostToLevel: 10
+    displaySuffix: 
+  thornsAmount:
+    defaultStatValue: 0
+    additiveStatValuePerLevel: 0.1
+    canLevelUp: 0
+    expCostToUnlock: 20
+    expCostToLevel: 10
+    displaySuffix: 
+  criticalHitChanceResist:
+    defaultStatValue: 0
+    additiveStatValuePerLevel: 0.1
+    canLevelUp: 0
+    expCostToUnlock: 20
+    expCostToLevel: 10
+    displaySuffix: '%'
+  criticalHitDamageResist:
+    defaultStatValue: 0
+    additiveStatValuePerLevel: 0.1
+    canLevelUp: 0
+    expCostToUnlock: 20
+    expCostToLevel: 10
+    displaySuffix: '%'
+  statusEffectResist:
+    defaultStatValue: 0
+    additiveStatValuePerLevel: 0.1
+    canLevelUp: 0
+    expCostToUnlock: 20
+    expCostToLevel: 10
+    displaySuffix: '%'
+  physicalDamageResist:
+    defaultStatValue: 0
+    additiveStatValuePerLevel: 0.1
+    canLevelUp: 0
+    expCostToUnlock: 20
+    expCostToLevel: 10
+    displaySuffix: '%'
+  magicalDamageResist:
+    defaultStatValue: 0
+    additiveStatValuePerLevel: 0.1
+    canLevelUp: 0
+    expCostToUnlock: 20
+    expCostToLevel: 10
+    displaySuffix: '%'
+  energyDamageResist:
+    defaultStatValue: 0
+    additiveStatValuePerLevel: 0.1
+    canLevelUp: 0
+    expCostToUnlock: 20
+    expCostToLevel: 10
+    displaySuffix: '%'

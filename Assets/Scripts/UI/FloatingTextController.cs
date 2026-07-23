@@ -10,6 +10,7 @@ namespace ShapeDefender
         {
             [SerializeField] private float floatingSpeed = 2f;
             [SerializeField] private TextMeshPro floatingText;
+            private Color textsDisplayColor;
             private float alphaValue = 1.0f;
             [SerializeField] private float fadeRate = 0.0001f;
 
@@ -17,7 +18,7 @@ namespace ShapeDefender
             {
                 transform.position += new Vector3(0.0f, floatingSpeed * Time.deltaTime, 0.0f);
                 alphaValue -= fadeRate;
-                Color newColor = new Color(floatingText.color.r, floatingText.color.b, floatingText.color.g, alphaValue);
+                Color newColor = new Color(textsDisplayColor.r, textsDisplayColor.g, textsDisplayColor.b, alphaValue);
                 floatingText.color = newColor;
 
                 if (alphaValue <= 0.0f)
@@ -30,6 +31,7 @@ namespace ShapeDefender
             {
                 floatingText.SetText(text);
                 floatingText.color = textsColor;
+                textsDisplayColor = textsColor;
             }
         }
     }

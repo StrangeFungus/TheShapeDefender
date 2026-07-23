@@ -1,0 +1,154 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 203d4a16ef2187942ba54b61abb5bc81, type: 3}
+  m_Name: DefaultEntityMovementStats
+  m_EditorClassIdentifier: Assembly-CSharp::ShapeDefender.MovementSystem.MovementStatSO
+  groundSpeed:
+    defaultStatValue: 50
+    additiveStatValuePerLevel: 5
+    canLevelUp: 0
+    expCostToUnlock: 1000
+    expCostToLevel: 10
+    displaySuffix: m/s
+  groundTurningSpeed:
+    defaultStatValue: 10
+    additiveStatValuePerLevel: 2
+    canLevelUp: 0
+    expCostToUnlock: 0
+    expCostToLevel: 10
+    displaySuffix: 
+  groundAccelerationSpeed:
+    defaultStatValue: 1
+    additiveStatValuePerLevel: 0.1
+    canLevelUp: 0
+    expCostToUnlock: 0
+    expCostToLevel: 10
+    displaySuffix: 
+  groundBrakingSpeed:
+    defaultStatValue: 4
+    additiveStatValuePerLevel: 0.2
+    canLevelUp: 0
+    expCostToUnlock: 0
+    expCostToLevel: 10
+    displaySuffix: 
+  surfaceWaterSpeed:
+    defaultStatValue: 75
+    additiveStatValuePerLevel: 5
+    canLevelUp: 0
+    expCostToUnlock: 1500
+    expCostToLevel: 20
+    displaySuffix: m/s
+  surfaceWaterTurningSpeed:
+    defaultStatValue: 8
+    additiveStatValuePerLevel: 1.5
+    canLevelUp: 0
+    expCostToUnlock: 0
+    expCostToLevel: 20
+    displaySuffix: 
+  surfaceWaterAccelerationSpeed:
+    defaultStatValue: 5
+    additiveStatValuePerLevel: 0.25
+    canLevelUp: 0
+    expCostToUnlock: 0
+    expCostToLevel: 20
+    displaySuffix: 
+  surfaceWaterBrakingSpeed:
+    defaultStatValue: 2
+    additiveStatValuePerLevel: 0.1
+    canLevelUp: 0
+    expCostToUnlock: 0
+    expCostToLevel: 20
+    displaySuffix: 
+  underwaterSpeed:
+    defaultStatValue: 40
+    additiveStatValuePerLevel: 3
+    canLevelUp: 0
+    expCostToUnlock: 5000
+    expCostToLevel: 60
+    displaySuffix: m/s
+  underwaterTurningSpeed:
+    defaultStatValue: 6
+    additiveStatValuePerLevel: 0.5
+    canLevelUp: 0
+    expCostToUnlock: 0
+    expCostToLevel: 60
+    displaySuffix: 
+  underwaterAccelerationSpeed:
+    defaultStatValue: 3
+    additiveStatValuePerLevel: 0.1
+    canLevelUp: 0
+    expCostToUnlock: 0
+    expCostToLevel: 60
+    displaySuffix: 
+  underwaterBrakingSpeed:
+    defaultStatValue: 10
+    additiveStatValuePerLevel: 1
+    canLevelUp: 0
+    expCostToUnlock: 0
+    expCostToLevel: 60
+    displaySuffix: 
+  flyingSpeed:
+    defaultStatValue: 120
+    additiveStatValuePerLevel: 7
+    canLevelUp: 0
+    expCostToUnlock: 12000
+    expCostToLevel: 120
+    displaySuffix: m/s
+  flyingTurningSpeed:
+    defaultStatValue: 12
+    additiveStatValuePerLevel: 2
+    canLevelUp: 0
+    expCostToUnlock: 0
+    expCostToLevel: 120
+    displaySuffix: 
+  flyingAccelerationSpeed:
+    defaultStatValue: 12
+    additiveStatValuePerLevel: 0.25
+    canLevelUp: 0
+    expCostToUnlock: 0
+    expCostToLevel: 120
+    displaySuffix: 
+  flyingBrakingSpeed:
+    defaultStatValue: 4
+    additiveStatValuePerLevel: 0.2
+    canLevelUp: 0
+    expCostToUnlock: 0
+    expCostToLevel: 120
+    displaySuffix: 
+  spaceTravelSpeed:
+    defaultStatValue: 250
+    additiveStatValuePerLevel: 10
+    canLevelUp: 0
+    expCostToUnlock: 50000
+    expCostToLevel: 500
+    displaySuffix: m/s
+  spaceTravelTurningSpeed:
+    defaultStatValue: 30
+    additiveStatValuePerLevel: 6
+    canLevelUp: 0
+    expCostToUnlock: 0
+    expCostToLevel: 500
+    displaySuffix: 
+  spaceTravelAccelerationSpeed:
+    defaultStatValue: 50
+    additiveStatValuePerLevel: 5
+    canLevelUp: 0
+    expCostToUnlock: 0
+    expCostToLevel: 500
+    displaySuffix: 
+  spaceTravelBrakingSpeed:
+    defaultStatValue: 50
+    additiveStatValuePerLevel: 5
+    canLevelUp: 0
+    expCostToUnlock: 0
+    expCostToLevel: 500
+    displaySuffix: 

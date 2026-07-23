@@ -1,0 +1,60 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 96178ab65558c56418b9b93321f2bea9, type: 3}
+  m_Name: PlayerHealthStats
+  m_EditorClassIdentifier: Assembly-CSharp::HealthData
+  currentHealth: 0
+  maximumHealth:
+    defaultStatValue: 200
+    additiveStatValuePerLevel: 5
+    canLevelUp: 1
+    expCostToUnlock: 0
+    expCostToLevel: 10
+    displaySuffix: 
+  healthRegenAmount:
+    defaultStatValue: 1
+    additiveStatValuePerLevel: 1
+    canLevelUp: 0
+    expCostToUnlock: 10
+    expCostToLevel: 10
+    displaySuffix: 
+  healthRegenCooldown:
+    defaultStatValue: 30
+    additiveStatValuePerLevel: -0.05
+    canLevelUp: 0
+    expCostToUnlock: 10
+    expCostToLevel: 10
+    displaySuffix: sec(s)
+  currentHealthRegenCooldown: 0
+  currentEnergyShields: 0
+  maximumEnergyShields:
+    defaultStatValue: 20
+    additiveStatValuePerLevel: 1
+    canLevelUp: 0
+    expCostToUnlock: 20
+    expCostToLevel: 10
+    displaySuffix: 
+  energyShieldsRegenAmount:
+    defaultStatValue: 1
+    additiveStatValuePerLevel: 1
+    canLevelUp: 0
+    expCostToUnlock: 10
+    expCostToLevel: 10
+    displaySuffix: 
+  energyShieldsRegenCooldown:
+    defaultStatValue: 30
+    additiveStatValuePerLevel: -0.05
+    canLevelUp: 0
+    expCostToUnlock: 10
+    expCostToLevel: 10
+    displaySuffix: sec(s)
+  currentEnergyShieldsRegenCooldown: 0

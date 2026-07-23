@@ -8,14 +8,26 @@ namespace ShapeDefender
         [System.Serializable]
         public class FloatingTextSpawner : MonoBehaviour
         {
+            public static FloatingTextSpawner Instance;
             [SerializeField] private GameObject floatingTextPrefab;
+
+            private void Awake()
+            {
+                if (Instance == null)
+                {
+                    Instance = this;
+                }
+                else
+                {
+                    Destroy(gameObject);
+                }
+            }
 
             public void SpawnText(string textToDisplay, Color textsColor, Vector3 locationToSpawn)
             {
                 GameObject newFloatingText = Instantiate(floatingTextPrefab, locationToSpawn, floatingTextPrefab.transform.rotation);
-                TextMeshPro newFloatingTextTMP = newFloatingText.GetComponent<TextMeshPro>();
-                newFloatingTextTMP.text = textToDisplay;
-                newFloatingTextTMP.color = textsColor;
+                FloatingTextController newFloatingTextController = newFloatingText.GetComponent<FloatingTextController>();
+                newFloatingTextController.SetFloatingText(textToDisplay, textsColor);
             }
         }
     }
