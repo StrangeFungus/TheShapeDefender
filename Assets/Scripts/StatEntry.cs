@@ -8,7 +8,7 @@ namespace ShapeDefender
         [SerializeField] private float defaultStatValue;
         [SerializeField] private float additiveStatValuePerLevel;
         public float AdditiveStatValuePerLevel { get { return additiveStatValuePerLevel; } }
-        private int statsLevel = 0;
+        [HideInInspector] public int statsLevel = 0;
 
         public float StatValue { get { if (!canLevelUp) { return 0.0f; } return Mathf.Max(0f, defaultStatValue + (additiveStatValuePerLevel * statsLevel)); } }
 
@@ -17,7 +17,7 @@ namespace ShapeDefender
         public float expCostToLevel;
         public string displaySuffix = "";
 
-        public void IncreaseStatsLevel(int value = 1)
+        public void IncreaseStatsLevel(int value)
         {
             statsLevel += value;
         }

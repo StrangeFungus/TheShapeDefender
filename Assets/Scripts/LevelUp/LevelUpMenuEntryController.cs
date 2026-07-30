@@ -2,6 +2,7 @@ namespace ShapeDefender
 {
     namespace LevelUpSystem
     {
+        using ShapeDefender.Tools;
         using TMPro;
         using UnityEngine;
 
@@ -21,12 +22,12 @@ namespace ShapeDefender
                 unlockButtonText.SetText($"Experience To Unlock:\n{valueToUnlock:F2}");
             }
 
-            public void UnlockPurchaseButton(StatEntry statsEntry)
+            public void UnlockPurchaseButton(StatEntry statsEntry, int purchaseMultiplier)
             {
                 statsEntry.canLevelUp = true;
                 unlockButton.SetActive(false);
                 purchaseButton.SetActive(true);
-                UpdateMenuEntry(statsEntry);
+                UpdateMenuEntry(statsEntry, purchaseMultiplier);
             }
 
             public void DisablePurchaseButton()
@@ -34,9 +35,9 @@ namespace ShapeDefender
                 purchaseButton.SetActive(false);
             }
 
-            public void UpdateMenuEntry(StatEntry statsEntry)
+            public void UpdateMenuEntry(StatEntry statsEntry, int purchaseMultiplier)
             {
-                float valueToLevelUp = statsEntry.expCostToLevel;
+                float valueToLevelUp = CalculateCost.StatExpCost(statsEntry.statsLevel, statsEntry.expCostToLevel, purchaseMultiplier);
                 purchaseButtonText.SetText($"Experience To Level Up:\n{valueToLevelUp:F2}");
 
                 float valueToDisplay = statsEntry.StatValue;

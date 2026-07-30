@@ -24,7 +24,10 @@ namespace ShapeDefender
 
             private new void Update()
             {
-                movementDirection = (playerObject.transform.position - transform.position).normalized;
+                if (playerObject != null)
+                {
+                    movementDirection = (playerObject.transform.position - transform.position).normalized;
+                }
                 base.Update();
             }
 

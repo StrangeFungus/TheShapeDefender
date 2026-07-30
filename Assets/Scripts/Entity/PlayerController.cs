@@ -28,7 +28,23 @@ namespace ShapeDefender
 
                 if (Keyboard.current.oKey.wasPressedThisFrame)
                 {
-                    RespawnScreenManager.Instance.ToggleRespawnScreen();
+                    gameObject.SetActive(false);
+                }
+                if (Keyboard.current.numpad1Key.wasPressedThisFrame)
+                {
+                    Time.timeScale = 1.0f;
+                }
+                if (Keyboard.current.numpad3Key.wasPressedThisFrame)
+                {
+                    Time.timeScale = 3.0f;
+                }
+                if (Keyboard.current.numpad5Key.wasPressedThisFrame)
+                {
+                    Time.timeScale = 5.0f;
+                }
+                if (Keyboard.current.numpad9Key.wasPressedThisFrame)
+                {
+                    Time.timeScale = 9.0f;
                 }
             }
 

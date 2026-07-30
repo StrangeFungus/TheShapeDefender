@@ -2,9 +2,7 @@ namespace ShapeDefender
 {
     namespace LevelUpSystem
     {
-        using ShapeDefender.DefenseSystem;
-        using ShapeDefender.HealthSystem;
-        using ShapeDefender.MovementSystem;
+        using ShapeDefender.Tools;
         using UnityEngine;
 
         [System.Serializable]
@@ -36,12 +34,15 @@ namespace ShapeDefender
                 return false;
             }
 
-            public bool AttemptToLevelUpStat(ref float callersExperiencePoints, StatEntry callersStatEntry)
+            public bool AttemptToLevelUpStat(ref float callersExperiencePoints, StatEntry callersStatEntry, int purchaseMultiplier)
             {
-                if (callersExperiencePoints >= callersStatEntry.expCostToLevel)
+                float totalCostToLevel = CalculateCost.StatExpCost(callersStatEntry.statsLevel, callersStatEntry.expCostToLevel, purchaseMultiplier);
+
+                if (callersExperiencePoints >= totalCostToLevel)
                 {
-                    callersExperiencePoints -= callersStatEntry.expCostToLevel;
-                    callersStatEntry.IncreaseStatsLevel();
+                    callersExperiencePoints -= totalCostToLevel;
+                    callersStatEntry.IncreaseStatsLevel(purchaseMultiplier);
+                    Debug.Log($"callersExperiencePoints: {callersExperiencePoints} / Statslevel: {callersStatEntry.statsLevel} / StatsExpCost: {callersStatEntry.expCostToLevel}, Multi: {purchaseMultiplier}");
                     return true;
                 }
 
