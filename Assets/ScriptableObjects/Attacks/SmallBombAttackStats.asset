@@ -1,0 +1,191 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 39ca8c34b902aaa419dfa5660cef5674, type: 3}
+  m_Name: SmallBombAttackStats
+  m_EditorClassIdentifier: Assembly-CSharp::ShapeDefender.AttackSystem.AttackStatSO
+  attacksName: 3
+  projectilePrefab: {fileID: 7848829898677827505, guid: 27cbd140ee231d3438db0196c99d0e8a, type: 3}
+  homesOntoTarget: 0
+  projectileSpeed:
+    defaultStatValue: 12
+    additiveStatValuePerLevel: 0.4
+    statsLevel: 0
+    canLevelUp: 1
+    expCostToUnlock: 0
+    expCostToLevel: 10
+    displaySuffix: m
+  attackRangeMinimum:
+    defaultStatValue: 1
+    additiveStatValuePerLevel: -0.03
+    statsLevel: 0
+    canLevelUp: 1
+    expCostToUnlock: 0
+    expCostToLevel: 8
+    displaySuffix: m
+  attackRangeMaximum:
+    defaultStatValue: 9
+    additiveStatValuePerLevel: 0.15
+    statsLevel: 0
+    canLevelUp: 1
+    expCostToUnlock: 0
+    expCostToLevel: 12
+    displaySuffix: m
+  attackCooldown:
+    defaultStatValue: 3.2
+    additiveStatValuePerLevel: -0.04
+    statsLevel: 0
+    canLevelUp: 1
+    expCostToUnlock: 0
+    expCostToLevel: 14
+    displaySuffix: 
+  currentAttacksCooldown: 0
+  attackAccuracyAngle:
+    defaultStatValue: 25
+    additiveStatValuePerLevel: -0.4
+    statsLevel: 0
+    canLevelUp: 1
+    expCostToUnlock: 0
+    expCostToLevel: 10
+    displaySuffix: "\xB0"
+  projectileCount:
+    defaultStatValue: 1
+    additiveStatValuePerLevel: 0.05
+    statsLevel: 0
+    canLevelUp: 1
+    expCostToUnlock: 0
+    expCostToLevel: 15
+    displaySuffix: 
+  multistrikeChance:
+    defaultStatValue: 0
+    additiveStatValuePerLevel: 0
+    statsLevel: 0
+    canLevelUp: 0
+    expCostToUnlock: 0
+    expCostToLevel: 0
+    displaySuffix: '%'
+  multistrikeMaxHitsCombo:
+    defaultStatValue: 1
+    additiveStatValuePerLevel: 0
+    statsLevel: 0
+    canLevelUp: 1
+    expCostToUnlock: 0
+    expCostToLevel: 0
+    displaySuffix: 
+  targetPiercingQuantity:
+    defaultStatValue: 0
+    additiveStatValuePerLevel: 0
+    statsLevel: 0
+    canLevelUp: 0
+    expCostToUnlock: 0
+    expCostToLevel: 0
+    displaySuffix: 
+  areaOfEffectRadius:
+    defaultStatValue: 1.2
+    additiveStatValuePerLevel: 0.08
+    statsLevel: 0
+    canLevelUp: 1
+    expCostToUnlock: 0
+    expCostToLevel: 12
+    displaySuffix: 
+  currentSummonsAmount: 0
+  maximumSummonsLimit:
+    defaultStatValue: 0
+    additiveStatValuePerLevel: 0
+    statsLevel: 0
+    canLevelUp: 0
+    expCostToUnlock: 0
+    expCostToLevel: 0
+    displaySuffix: 
+  summonSpawnCooldown:
+    defaultStatValue: 0
+    additiveStatValuePerLevel: 0
+    statsLevel: 0
+    canLevelUp: 0
+    expCostToUnlock: 0
+    expCostToLevel: 0
+    displaySuffix: 
+  projectilesDamageStats:
+    minimumDamage:
+      defaultStatValue: 6
+      additiveStatValuePerLevel: 1.8
+      statsLevel: 0
+      canLevelUp: 1
+      expCostToUnlock: 0
+      expCostToLevel: 10
+      displaySuffix: 
+    maximumDamage:
+      defaultStatValue: 11
+      additiveStatValuePerLevel: 2.4
+      statsLevel: 0
+      canLevelUp: 1
+      expCostToUnlock: 0
+      expCostToLevel: 10
+      displaySuffix: 
+    criticalHitChance:
+      defaultStatValue: 3
+      additiveStatValuePerLevel: 0.5
+      statsLevel: 0
+      canLevelUp: 1
+      expCostToUnlock: 0
+      expCostToLevel: 12
+      displaySuffix: '%'
+    criticalHitDamage:
+      defaultStatValue: 150
+      additiveStatValuePerLevel: 2
+      statsLevel: 0
+      canLevelUp: 1
+      expCostToUnlock: 0
+      expCostToLevel: 10
+      displaySuffix: '%'
+    splashDamageRadius:
+      defaultStatValue: 1.4
+      additiveStatValuePerLevel: 0.09
+      statsLevel: 0
+      canLevelUp: 1
+      expCostToUnlock: 0
+      expCostToLevel: 12
+      displaySuffix: "\xB0"
+    splashDamageFalloffRate:
+      defaultStatValue: 0.035
+      additiveStatValuePerLevel: -0.001
+      statsLevel: 0
+      canLevelUp: 1
+      expCostToUnlock: 0
+      expCostToLevel: 10
+      displaySuffix: 
+    knockbackDistance:
+      defaultStatValue: 0.9
+      additiveStatValuePerLevel: 0.06
+      statsLevel: 0
+      canLevelUp: 1
+      expCostToUnlock: 0
+      expCostToLevel: 10
+      displaySuffix: 
+    knockbackDamage:
+      defaultStatValue: 1
+      additiveStatValuePerLevel: 0.4
+      statsLevel: 0
+      canLevelUp: 1
+      expCostToUnlock: 0
+      expCostToLevel: 10
+      displaySuffix: 
+    ignoreArmorAmount:
+      defaultStatValue: 0
+      additiveStatValuePerLevel: 0.3
+      statsLevel: 0
+      canLevelUp: 1
+      expCostToUnlock: 0
+      expCostToLevel: 12
+      displaySuffix: 
+  canLevelUp: 0
+  attacksLevel: 1
+  expCostToUnlock: 400

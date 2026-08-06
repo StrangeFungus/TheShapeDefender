@@ -9,10 +9,9 @@ namespace ShapeDefender
 
         public static class DamageProcessor
         {
-            public static bool ProcessDamageToTarget(GameObject targetHit, GameObject attacksObject, DamageStatSO incomingRuntimeDamageStatSO)
+            public static bool ProcessDamageToTarget(GameObject targetHit, GameObject attacksObject, AttackStatSO incomingRuntimeAttackStatSO)
             {
                 if (targetHit == null) { return false; }
-                if (incomingRuntimeDamageStatSO == null) { return false; }
                 if (!targetHit.TryGetComponent<HealthStatContainer>(out HealthStatContainer targetsHealthStatContainer)) { return false; }
 
                 // What are we doing here:
@@ -20,8 +19,8 @@ namespace ShapeDefender
                 // If the target hit has defensive components we can then attempt to defend that damage before it gets applied.
                 // Apply said damage to target.
 
-                float minDamage = incomingRuntimeDamageStatSO.minimumDamage.StatValue;
-                float maxDamage = incomingRuntimeDamageStatSO.maximumDamage.StatValue;
+                float minDamage = incomingRuntimeAttackStatSO.projectilesDamageStats.minimumDamage.StatValue;
+                float maxDamage = incomingRuntimeAttackStatSO.projectilesDamageStats.maximumDamage.StatValue;
                 if (minDamage > maxDamage)
                 {
                     minDamage = maxDamage;
@@ -29,8 +28,8 @@ namespace ShapeDefender
                 float damage = Random.Range(minDamage, maxDamage);
 
                 float bonusDamage = 0f;
-                float critHitChance = incomingRuntimeDamageStatSO.criticalHitChance.StatValue;
-                float critDamagePercent = incomingRuntimeDamageStatSO.criticalHitDamage.StatValue;
+                float critHitChance = incomingRuntimeAttackStatSO.projectilesDamageStats.criticalHitChance.StatValue;
+                float critDamagePercent = incomingRuntimeAttackStatSO.projectilesDamageStats.criticalHitDamage.StatValue / 100f;
                 if (Random.Range(1f, 100f) <= critHitChance)
                 {
                     bonusDamage = (damage * critDamagePercent) - damage;

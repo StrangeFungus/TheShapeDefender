@@ -2,7 +2,7 @@ namespace ShapeDefender
 {
     namespace EntitySystem
     {
-        using ShapeDefender.LevelUpSystem;
+        using ShapeDefender.UI;
         using UnityEngine;
 
         [System.Serializable]
@@ -11,6 +11,7 @@ namespace ShapeDefender
             private Vector2 movementDirection;
             private GameObject playerObject;
             [SerializeField] private float experienceReward = 10f;
+            public int difficultyValue = 1;
 
             private void Start()
             {
@@ -33,8 +34,8 @@ namespace ShapeDefender
 
             private void OnDisable()
             {
-                LevelUpMenuManager.Instance.playersExperiencePoints += experienceReward;
-                LevelUpMenuManager.Instance.UpdateExperiencePointTrackerText();
+                PlayerExperienceController.Instance.playersExperiencePoints += experienceReward * PlayerExperienceController.Instance.experienceGainMultiplier;
+                PlayerExperienceController.Instance.UpdateExperiencePointTrackerText();
             }
 
             private void FixedUpdate()

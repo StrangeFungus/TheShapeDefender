@@ -5,6 +5,7 @@ namespace ShapeDefender
         using System.Collections;
         using System.Collections.Generic;
         using ShapeDefender.LevelUpSystem;
+        using ShapeDefender.UI;
         using TMPro;
         using UnityEngine;
 
@@ -13,7 +14,7 @@ namespace ShapeDefender
             public static WaveSpawnManager Instance;
             [HideInInspector] public int currentWave = 0;
             private float waveDifficultyRating = 0;
-            [SerializeField] private GameObject defaultEnemyPrefab;
+            [SerializeField] private EnemyAI defaultEnemyPrefab;
             [SerializeField] private List<EnemyAI> enemyPrefabs;
             [SerializeField] private List<EnemyAI> enemyBossPrefabs;
 
@@ -106,7 +107,7 @@ namespace ShapeDefender
 
             private void CalculateWaveDifficulty()
             {
-                float totalRating = Mathf.Max(1, (currentWave + LevelUpMenuManager.Instance.playersDifficultyRating) / 100f);
+                float totalRating = Mathf.Max(1, (currentWave + PlayerExperienceController.Instance.playersDifficultyRating) / 100f);
                 waveDifficultyRating += totalRating;
             }
 
@@ -114,31 +115,62 @@ namespace ShapeDefender
             {
                 for (int i = 0; i < waveDifficultyRating; i++)
                 {
+                    EnemyAI newEnemy = null;
                     if (enemyPrefabs.Count > 0)
                     {
                         int randomEnemyIndex = Random.Range(0, enemyPrefabs.Count - 1);
                         // Pick one up from the object pool if it exists.
-                        Instantiate(enemyPrefabs[randomEnemyIndex]);
+                        newEnemy = Instantiate(enemyPrefabs[randomEnemyIndex]);
                     }
                     else
                     {
-                        Instantiate(defaultEnemyPrefab);
+                        newEnemy = Instantiate(defaultEnemyPrefab);
                     }
+                    RandomizeSpawnPoint(newEnemy);
                 }
             }
 
             private void SpawnBoss()
             {
+                EnemyAI newEnemy = null;
                 if (enemyBossPrefabs.Count > 0)
                 {
                     int randomEnemyIndex = Random.Range(0, enemyBossPrefabs.Count - 1);
                     // Pick one up from the object pool if it exists.
-                    Instantiate(enemyBossPrefabs[randomEnemyIndex]);
+                    newEnemy = Instantiate(enemyBossPrefabs[randomEnemyIndex]);
                 }
                 else
                 {
-                    Instantiate(defaultEnemyPrefab);
+                    newEnemy = Instantiate(defaultEnemyPrefab);
                 }
+                RandomizeSpawnPoint(newEnemy);
+            }
+
+            private void RandomizeSpawnPoint(EnemyAI enemyToRandomize)
+            {
+                GameObject player = GameObject.Find("Player");
+                float distanceFromPlayerToSpawn = 40f;
+
+                Vector3 playersLocation = player.transform.position;
+                float randomizedXLocation = playersLocation.x + Random.Range(-distanceFromPlayerToSpawn, distanceFromPlayerToSpawn);
+                float randomizedYLocation = playersLocation.y + Random.Range(-distanceFromPlayerToSpawn, distanceFromPlayerToSpawn);
+                Vector3 randomizedLocation = new Vector3(randomizedXLocation, randomizedYLocation, 0f);
+                int attemptsMade = 1;
+                while (true)
+                {
+                    if ((randomizedLocation - playersLocation).sqrMagnitude >= distanceFromPlayerToSpawn)
+                    {
+                        Debug.Log($"Attempts Taken To Find A Suitable Spawning Location: {attemptsMade}");
+                        break;
+                    }
+
+                    attemptsMade++;
+                    randomizedXLocation = playersLocation.x + Random.Range(-distanceFromPlayerToSpawn, distanceFromPlayerToSpawn);
+                    randomizedYLocation = playersLocation.y + Random.Range(-distanceFromPlayerToSpawn, distanceFromPlayerToSpawn);
+                    randomizedLocation = new Vector3(randomizedXLocation, randomizedYLocation, 0f);
+                }
+
+                enemyToRandomize.transform.position = randomizedLocation;
             }
         }
     }

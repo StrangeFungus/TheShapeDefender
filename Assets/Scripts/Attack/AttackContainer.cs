@@ -2,30 +2,23 @@ namespace ShapeDefender
 {
     namespace AttackSystem
     {
-        using System.Collections;
         using System.Collections.Generic;
-        using ShapeDefender.DamageSystem;
+        using ShapeDefender.AttackUpgradeSystem;
         using ShapeDefender.Tools;
         using UnityEngine;
-        using static UnityEngine.GraphicsBuffer;
 
         [System.Serializable]
         public class AttackContainer : MonoBehaviour
         {
-            [SerializeField] private List<AttackStatSO> attackStatSOTemplates;
-            private List<AttackStatSO> runtimeAttackStatSO = new List<AttackStatSO>();
+            public List<AttackName> defaultAttacks;
+            public Dictionary<AttackName, AttackStatSO> runtimeAttackStatSO = new Dictionary<AttackName, AttackStatSO>();
             private bool canUseAttacks = true;
 
             private void Awake()
             {
-                if (attackStatSOTemplates != null)
+                if (defaultAttacks != null)
                 {
-                    foreach (AttackStatSO attackStatSO in attackStatSOTemplates)
-                    {
-                        AttackStatSO newAttackStatSO = Instantiate(attackStatSO);
-                        runtimeAttackStatSO.Add(newAttackStatSO);
-                        newAttackStatSO.currentAttacksCooldown = newAttackStatSO.attackCooldown.StatValue;
-                    }
+                    AttackUpgradeManager.Instance.AddNewAttacks(defaultAttacks, this);
                 }
             }
 
@@ -35,12 +28,13 @@ namespace ShapeDefender
 
                 foreach (var attack in runtimeAttackStatSO)
                 {
-                    attack.currentAttacksCooldown -= Time.deltaTime;
-                    GameObject target = FindTarget.FindTargetInRange(gameObject, attack.attackRangeMinimum.StatValue, attack.attackRangeMaximum.StatValue);
+                    attack.Value.currentAttacksCooldown -= Time.deltaTime;
+                    GameObject target = FindTarget.FindTargetInRange(gameObject, attack.Value.attackRangeMinimum.StatValue, attack.Value.attackRangeMaximum.StatValue);
 
-                    if (attack.currentAttacksCooldown <= 0.0f && target != null)
+                    if (attack.Value.currentAttacksCooldown <= 0.0f && target != null)
                     {
-                        SpawnNewAttack(attack, target);
+                        SpawnNewAttack(attack.Value, target);
+                        attack.Value.currentAttacksCooldown = attack.Value.attackCooldown.StatValue;
                     }
                 }
             }
@@ -51,11 +45,11 @@ namespace ShapeDefender
 
                 foreach (var attack in runtimeAttackStatSO)
                 {
-                    GameObject target = FindTarget.FindTargetInRange(callingObject, attack.attackRangeMinimum.StatValue, attack.attackRangeMaximum.StatValue);
+                    GameObject target = FindTarget.FindTargetInRange(callingObject, attack.Value.attackRangeMinimum.StatValue, attack.Value.attackRangeMaximum.StatValue);
 
                     if (target != null)
                     {
-                        SpawnNewAttack(attack, target);
+                        SpawnNewAttack(attack.Value, target);
                     }
                 }
             }
@@ -71,12 +65,15 @@ namespace ShapeDefender
 
             private void SpawnNewAttack(AttackStatSO attackStatSO, GameObject target)
             {
-                GameObject newAttackSpawn = Instantiate(attackStatSO.projectilePrefab, transform.position, Quaternion.identity);
-                AttackController newAttacksController = newAttackSpawn.GetComponent<AttackController>();
-                newAttacksController.runtimeAttackStatSO = Instantiate(attackStatSO);
-                newAttacksController.runtimeDamageStatSO = Instantiate(attackStatSO.projectilesDamageStatSOTemplate);
-                newAttacksController.SetTarget(target);
-                attackStatSO.currentAttacksCooldown = attackStatSO.attackCooldown.StatValue;
+                Vector2 direction = (target.transform.position - transform.position).normalized;
+                float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg - 90f;
+                Quaternion rotation = Quaternion.Euler(0f, 0f, angle);
+
+                GameObject newAttackSpawn = Instantiate(attackStatSO.projectilePrefab, transform.position, rotation);
+
+                AttackController controller = newAttackSpawn.GetComponent<AttackController>();
+                controller.runtimeAttackStatSO = Instantiate(attackStatSO);
+                controller.SetTarget(target);
             }
         }
     }

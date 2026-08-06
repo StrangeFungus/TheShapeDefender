@@ -14,9 +14,7 @@ namespace ShapeDefender
             private GameObject targetObject;
             private Vector3 targetLocation;
             private string targetTag;
-            private Vector2 targetDirection;
-
-            [HideInInspector] public DamageStatSO runtimeDamageStatSO;
+            private Vector3 targetDirection;
 
             private Vector3 spawnPosition;
             private float distanceTraveled = 0f;
@@ -40,16 +38,15 @@ namespace ShapeDefender
 
             private void FixedUpdate()
             {
-                // Move forward
                 Vector2 forward = transform.up;
-                hostsRigidbody2D.linearVelocity = forward * 20f;
+                hostsRigidbody2D.linearVelocity = forward * runtimeAttackStatSO.projectileSpeed.StatValue;
             }
 
             private void OnTriggerEnter2D(Collider2D collision)
             {
                 if (collision.CompareTag(targetTag))
                 {
-                    bool wasAttackReflected = DamageProcessor.ProcessDamageToTarget(collision.gameObject, gameObject, runtimeDamageStatSO);
+                    bool wasAttackReflected = DamageProcessor.ProcessDamageToTarget(collision.gameObject, gameObject, runtimeAttackStatSO);
                     if (!wasAttackReflected)
                     {
                         Destroy(gameObject);
@@ -64,15 +61,17 @@ namespace ShapeDefender
 
             public void SetTarget(GameObject targetsObject)
             {
-                if (targetsObject == null) { return; }
+                if (targetsObject == null) return;
 
                 targetObject = targetsObject;
                 targetLocation = targetsObject.transform.position;
                 targetTag = targetsObject.tag;
                 targetDirection = (targetLocation - transform.position).normalized;
-                Vector2 directionToTarget = (targetObject.transform.position - transform.position).normalized;
-                float targetAngle = Mathf.Atan2(directionToTarget.y, directionToTarget.x) * Mathf.Rad2Deg - 90f;
+
+                float targetAngle = Mathf.Atan2(targetDirection.y, targetDirection.x) * Mathf.Rad2Deg - 90f;
                 hostsRigidbody2D.SetRotation(targetAngle);
+
+                hostsRigidbody2D.linearVelocity = transform.up * runtimeAttackStatSO.projectileSpeed.StatValue;
             }
             /*
             private void OnDrawGizmos()
